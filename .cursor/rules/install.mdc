@@ -27,7 +27,9 @@ What this spoke does **not** cover (route elsewhere):
    never `~` (tilde ignores a faked `HOME`).
 2. Supported install targets at minimum: `claude` → `$HOME/.claude/skills`,
    `cursor` → `$HOME/.cursor/skills`. `all` (or interactive pick) does both.
-   Interactive walkthrough is the no-args path (like humanize, plus Cursor).
+   Interactive walkthrough is the no-args path. On a TTY, print a Turboplan-style
+   banner, step ticks, and next-steps; disable colour when stdout is not a TTY
+   (tests).
 3. `--copy` copies instead of linking. Say so in the output. Do not `rm -rf`
    a destination that is not a Superplan skill without asking. A dest is ours
    if it is a symlink to this pack's `skills/<name>`, or a directory whose

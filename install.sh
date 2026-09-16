@@ -8,16 +8,66 @@ want_claude=0
 want_cursor=0
 saw_agent=0
 
+if [[ -t 1 ]]; then
+	BOLD=$'\033[1m'
+	DIM=$'\033[2m'
+	RED=$'\033[31m'
+	GRN=$'\033[32m'
+	YEL=$'\033[33m'
+	MAG=$'\033[35m'
+	CYN=$'\033[36m'
+	WHT=$'\033[37m'
+	RST=$'\033[0m'
+else
+	BOLD=""
+	DIM=""
+	RED=""
+	GRN=""
+	YEL=""
+	MAG=""
+	CYN=""
+	WHT=""
+	RST=""
+fi
+
+die() {
+	printf '%s\n' "${RED}${BOLD}✖${RST}   ${1}" >&2
+	exit 1
+}
+
 usage() {
-	cat <<'EOF'
-Usage:
-  ./install.sh              interactive agent select
-  ./install.sh claude       ~/.claude/skills
-  ./install.sh cursor       ~/.cursor/skills
-  ./install.sh all          both
-  ./install.sh --copy       copy instead of symlink
-  ./install.sh -h, --help
+	cat <<EOF
+${BOLD}Usage${RST}
+  ${CYN}./install.sh${RST}              interactive agent select
+  ${CYN}./install.sh${RST} ${YEL}claude${RST}       \$HOME/.claude/skills
+  ${CYN}./install.sh${RST} ${YEL}cursor${RST}       \$HOME/.cursor/skills
+  ${CYN}./install.sh${RST} ${YEL}all${RST}          both
+  ${CYN}./install.sh${RST} ${YEL}--copy${RST}       copy instead of symlink
+  ${CYN}./install.sh${RST} ${YEL}-h, --help${RST}
+
+${BOLD}What it does${RST}
+  Symlinks this repo's ${DIM}skills/<name>${RST} into Claude Code and/or Cursor
+  personal skills so ${MAG}/grill-me${RST} works in every workspace.
+
+${BOLD}Then${RST}
+  Restart the agent, open a planning hub, run ${MAG}/superplan-init${RST} if needed.
 EOF
+}
+
+banner() {
+	printf '\n'
+	printf '%s\n' "${MAG}${BOLD}"
+	cat <<'EOF'
+ ____                              _
+/ ___| _   _ _ __   ___ _ __ _ __ | | __ _ _ __
+\___ \| | | | '_ \ / _ \ '__| '_ \| |/ _` | '_ \
+ ___) | |_| | |_) |  __/ |  | |_) | | (_| | | | |
+|____/ \__,_| .__/ \___|_|  | .__/|_|\__,_|_| |_|
+            |_|             |_|
+EOF
+	printf '%s\n' "${RST}"
+	printf '  %s\n' "${DIM}global skill pack  ·  Claude Code  ·  Cursor  ·  data-only hubs${RST}"
+	printf '\n'
 }
 
 agent_dest() {
@@ -25,8 +75,7 @@ agent_dest() {
 	claude) printf '%s/.claude/skills' "$HOME" ;;
 	cursor) printf '%s/.cursor/skills' "$HOME" ;;
 	*)
-		echo "install: unknown agent $1" >&2
-		exit 2
+		die "unknown agent $1"
 		;;
 	esac
 }
@@ -46,17 +95,19 @@ is_ours() {
 }
 
 prompt_agents() {
-	printf '%s\n' \
-		"Select agents:" \
-		"  1) claude   $HOME/.claude/skills" \
-		"  2) cursor   $HOME/.cursor/skills" \
-		"  3) all      both" \
-		"Enter 1, 2, 3 or claude/cursor/all:"
+	printf '%s\n' "  ${BOLD}${WHT}Select agents${RST}"
+	printf '\n'
+	printf '%s\n' "  ${BOLD}1)${RST}  Claude Code    ${DIM}${HOME}/.claude/skills${RST}"
+	printf '%s\n' "  ${BOLD}2)${RST}  Cursor         ${DIM}${HOME}/.cursor/skills${RST}"
+	printf '%s\n' "  ${BOLD}3)${RST}  Both"
+	printf '\n'
+	printf '%s' "  ${CYN}›${RST}   Enter ${BOLD}1${RST}, ${BOLD}2${RST}, ${BOLD}3${RST} or claude/cursor/all: "
 	local ans=""
 	if ! IFS= read -r ans; then
 		echo "install: no agent selected" >&2
 		exit 2
 	fi
+	printf '\n'
 	case "$ans" in
 	1 | claude)
 		want_claude=1
@@ -79,6 +130,8 @@ prompt_agents() {
 	esac
 	saw_agent=1
 }
+
+banner
 
 for arg in "$@"; do
 	case "$arg" in
@@ -119,8 +172,7 @@ if [[ "$saw_agent" -eq 0 ]]; then
 fi
 
 if [[ ! -d "$PACK" ]]; then
-	echo "install: missing skills dir: $PACK" >&2
-	exit 1
+	die "missing skills dir: $PACK"
 fi
 
 shopt -s nullglob
@@ -132,8 +184,7 @@ for dir in "$PACK"/*/; do
 done
 
 if [[ "${#names[@]}" -eq 0 ]]; then
-	echo "install: no skills in $PACK" >&2
-	exit 1
+	die "no skills in $PACK"
 fi
 
 agents=()
@@ -143,6 +194,11 @@ fi
 if [[ "$want_cursor" -eq 1 ]]; then
 	agents+=("cursor")
 fi
+
+printf '%s\n' "  ${BOLD}${WHT}📦  Pack${RST}    ${DIM}${PACK}${RST}"
+printf '%s\n' "  ${BOLD}${WHT}🔗  Mode${RST}    ${WHT}${MODE}${RST}"
+printf '%s\n' "  ${DIM}══════════════════════════════════════════════════════════${RST}"
+printf '\n'
 
 preflight() {
 	local agent dest_root name dest src
@@ -164,6 +220,9 @@ preflight() {
 apply() {
 	local agent dest_root name dest src
 	local verb="linked"
+	local total="${#agents[@]}"
+	local step=0
+	local emoji
 	if [[ "$MODE" == "copy" ]]; then
 		verb="copied"
 	fi
@@ -185,8 +244,29 @@ apply() {
 			fi
 			printf '  %s %s\n' "$verb" "$name"
 		done
+		step=$((step + 1))
+		if [[ "$agent" == "claude" ]]; then
+			emoji="🟠"
+		else
+			emoji="⬛"
+		fi
+		printf '%s\n' "${GRN}${BOLD}✓${RST}   ${DIM}${step}/${total}${RST}  ${emoji}  ${BOLD}${agent}${RST}  ${DIM}· ${verb} ${#names[@]} skills${RST}"
 	done
 }
 
 preflight
 apply
+
+printf '\n'
+printf '%s\n' "  ${GRN}${BOLD}══════════════════════════════════════════════════════════${RST}"
+printf '  %s  %s\n' "${GRN}${BOLD}✦${RST}" "${BOLD}${WHT}Superplan landed — skills are global${RST}"
+printf '%s\n' "  ${GRN}${BOLD}══════════════════════════════════════════════════════════${RST}"
+printf '\n'
+printf '%s\n' "  ${BOLD}${WHT}🚀  Next steps${RST}"
+printf '\n'
+printf '%s\n' "  ${BOLD}${WHT}1️⃣${RST}   Restart Cursor and Claude Code"
+printf '    %s\n\n' "${DIM}Personal skills load at session start.${RST}"
+printf '%s\n' "  ${BOLD}${WHT}2️⃣${RST}   Open a planning hub (or run ${MAG}/superplan-init${RST})"
+printf '    %s\n\n' "${DIM}Hubs are data-only. Skills stay in ~/.claude/skills and ~/.cursor/skills.${RST}"
+printf '%s\n' "  ${BOLD}${WHT}3️⃣${RST}   Type ${MAG}/grill-me${RST}"
+printf '    %s\n\n' "${DIM}Edits in this git repo are live while the install is a symlink.${RST}"
