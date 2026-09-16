@@ -14,7 +14,7 @@
 | T05 | [/superplan-init](./T05-superplan-init.md) | ✅ | T04 | T06 | L4 | Workspace → hub folder → repos |
 | T06 | [Hub templates](./T06-hub-templates.md) | ✅ | T05 | T07 | L5 | Data-only; no skill copies |
 | T07 | [Hub resolution](./T07-hub-resolution.md) | ✅ | T06 | T08 | L6 | Global skills find the hub |
-| T08 | [E2E dummy project](./T08-e2e-dummy.md) | Pending | T07 | — | L7 | Live install + dummy hub |
+| T08 | [E2E dummy project](./T08-e2e-dummy.md) | ✅ | T07 | — | L7 | Live install + dummy hub |
 
 ## Layer legend
 

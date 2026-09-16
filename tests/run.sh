@@ -198,6 +198,7 @@ npx skills add
 -a claude-code
 -a cursor
 ~/.cursor/skills
+Uninstall
 EOF
 if [[ "$readme_ok" -eq 1 ]]; then
 	ok "README documents install.sh and npx skills add"

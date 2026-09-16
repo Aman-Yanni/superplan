@@ -69,7 +69,7 @@ While Superplan itself is being built, prefer **symlink** from this git repo so 
 | ---- | ----- |
 | 🧭 Agent rules (`.cursor/rules/`) | Bootstrapped |
 | 📋 MVP plan (`planning/phases/`) | Seeded — see INDEX |
-| 🛠️ Product code (`skills/`, `install.sh`) | T07: pack, installer, init, hub templates, hub resolution. **Live install is T08 — ask first** |
+| 🛠️ Product code (`skills/`, `install.sh`) | T08: globally installed via `./install.sh all` (symlink). Dummy hub `DummySuperplan`. No GitHub remote; `npx -g` not used |
 | 🧰 Verify | `make verify` (shellcheck + tests + pack-check) passes |
 | 📦 Toolchain | Node v22.18.0 (npx skills consumer only); shellcheck 0.11.0; lefthook 2.1.14 |
 
@@ -114,6 +114,19 @@ test -f ~/.cursor/skills/grill-me/SKILL.md
 Always pass **`-a claude-code -a cursor`**. After a global add, confirm **`~/.cursor/skills/<name>/SKILL.md`** exists. The CLI has historically written `~/.agents/skills` and skipped Cursor's personal dir. If `~/.cursor/skills/grill-me/SKILL.md` is missing, run `./install.sh cursor` (or reinstall with `-a cursor -g`) and check again. Never install into `~/.cursor/skills-cursor`.
 
 There is no GitHub remote yet, so `npx skills add owner/superplan` will not work. Do not publish this pack to the skills.sh registry unless asked.
+
+### Uninstall
+
+Remove only Superplan dests that are symlinks into this repo. Keep `humanize` and any other skills.
+
+```bash
+# from the Superplan clone
+for n in audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks superplan-init task-1-plan task-2-execute task-3-complete; do
+  rm -f "$HOME/.claude/skills/$n" "$HOME/.cursor/skills/$n"
+done
+```
+
+Dummy hub (T08): `rm -rf "/Users/aman/projects/Claude Plans/DummySuperplan"`. Optional dummy repo: `/Users/aman/projects/other/dummy-superplan`. Config: `~/.superplan/config.yml`.
 
 ## 📂 Repo layout
 

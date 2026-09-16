@@ -32,7 +32,9 @@ What this spoke does **not** cover (route elsewhere):
    a destination that is not a Superplan skill without asking. A dest is ours
    if it is a symlink to this pack's `skills/<name>`, or a directory whose
    `.superplan-install` first line is that absolute source path. Preflight
-   every dest before applying any.
+   every dest before applying any. Live install into the real home is OK only
+   when the human asked (T08). Uninstall is `rm` of those dests; never delete
+   unrelated skills such as `humanize`.
 4. `./install.sh` must work with **no Node**. `npx skills` is the later
    distribution path, not a requirement for local install.
 5. Tests run against a fake `HOME`, never the developer's real skill dirs,
@@ -64,6 +66,14 @@ https://code.claude.com/docs/en/skills
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
 | Unrelated skill directory gone after install | `rm -rf` on a dest name collision | Only replace dest if it is a Superplan symlink (readlink equals pack `skills/<name>`) or a previous Superplan copy (`.superplan-install` marker). Preflight all dests; otherwise stop and ask |
+
+<!-- last-verified: 2026-09 -->
+
+### `Uninstall deleted a foreign skill`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `humanize` (or another skill) gone after removing Superplan | Uninstall used `rm -rf ~/.claude/skills` | Remove only Superplan dest names that are our symlinks or `.superplan-install` copies |
 
 <!-- last-verified: 2026-09 -->
 
