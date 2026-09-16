@@ -94,4 +94,4 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 
 ## Reality notes
 
-*(Amended by upstream `/task-3-complete` if prior tasks changed assumptions)*
+T05 shipped `skills/superplan-init/init.sh`, which writes `$HOME/.superplan/config.yml` and `<hub>/superplan.yml` (`merge_prs: false`, `repos:`) and creates the hub directory. It does **not** write `CLAUDE.md`, `AGENTS.md`, `phases/`, or `rules/`. T06 adds `templates/hub/` and extends init (or a follow-on write) to fill those without wiping `superplan.yml` or later user `rules/` entries. No skill copies in the hub.

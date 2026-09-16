@@ -58,6 +58,11 @@ What this spoke does **not** cover (route elsewhere):
 Saved default (target): `~/.superplan/config.yml` → `planning_workspace`.
 Per hub (target): `<hub>/superplan.yml` → repos, `merge_prs: false`.
 
+Init file writes (until hub templates land) are **config only**: those two
+YAML files plus the workspace/hub directories. The helper is
+`skills/superplan-init/init.sh` (next to the pack `SKILL.md`, so a global
+symlink install can still run it). It must use `"$HOME/.superplan"`, not `~`.
+
 ## Docs (if stuck):
 
 **Docs (if stuck):** `/Users/aman/projects/Claude Plans/ColonyX/README.md`
@@ -83,5 +88,13 @@ Also: ColonyX `CLAUDE.md` (repo-rules-first, additionalDirectories).
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
 | Plan or edit contradicts the repo's CLAUDE.md / tests | Hub spoke or Superplan default used instead of repo sources | Re-read the repo; follow it; report the conflict; ask the human if a rule change is needed |
+
+<!-- last-verified: 2026-09 -->
+
+### `Init helper missing after global install`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `/superplan-init` cannot find the writer script | Helper lived only in the Superplan repo `scripts/` tree | Keep `init.sh` next to the pack `SKILL.md` |
 
 <!-- last-verified: 2026-09 -->

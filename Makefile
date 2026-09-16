@@ -10,7 +10,7 @@ SHELLCHECK ?= shellcheck
 help:
 	@echo "Targets:"
 	@echo "  make verify        - lint + test + pack-check (default gate; CI / lefthook)"
-	@echo "  make lint          - shellcheck install.sh tests/*.sh scripts/*.sh"
+	@echo "  make lint          - shellcheck install.sh tests/*.sh scripts/*.sh skills/*/*.sh"
 	@echo "  make test          - tests/run.sh (fake HOME)"
 	@echo "  make build         - pack-check skills/*/SKILL.md"
 	@echo "  make fmt           - shfmt -w if installed"
@@ -21,7 +21,7 @@ lint:
 	@command -v $(SHELLCHECK) >/dev/null 2>&1 || { echo "lint: shellcheck not installed"; exit 1; }
 	@test -f install.sh || { echo "lint: install.sh missing (T01)"; exit 1; }
 	$(SHELLCHECK) -x install.sh
-	@for f in tests/*.sh scripts/*.sh; do \
+	@for f in tests/*.sh scripts/*.sh skills/*/*.sh; do \
 		if [ -f "$$f" ]; then $(SHELLCHECK) -x "$$f"; fi; \
 	done
 
@@ -38,7 +38,7 @@ build:
 verify: lint test build
 
 fmt:
-	@command -v shfmt >/dev/null 2>&1 && shfmt -w install.sh tests scripts || true
+	@command -v shfmt >/dev/null 2>&1 && shfmt -w install.sh tests scripts skills || true
 
 clean:
 	rm -rf tmp/

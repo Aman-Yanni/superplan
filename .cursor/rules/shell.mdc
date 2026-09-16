@@ -22,9 +22,10 @@ What this spoke does **not** cover (route elsewhere):
 
 1. Scripts use `set -euo pipefail` (bash) or equivalent strict POSIX.
 2. `make verify` is lint + test + build. **lint** = shellcheck on `install.sh`,
-   `tests/*.sh`, and `scripts/*.sh`. **test** = `tests/run.sh`. **build** =
-   pack-check: every skill subdirectory has `SKILL.md` whose frontmatter `name:`
-   equals the folder; empty `skills/` (zero subdirs) is still OK.
+   `tests/*.sh`, `scripts/*.sh`, and `skills/*/*.sh`. **test** = `tests/run.sh`.
+   **build** = pack-check: every skill subdirectory has `SKILL.md` whose
+   frontmatter `name:` equals the folder; empty `skills/` (zero subdirs) is
+   still OK.
 3. Lint config is **`.shellcheckrc`**, not `.golangci.yml`. Execute/complete
    hard-abort if Makefile / lefthook / `.shellcheckrc` are missing.
 4. Tests must not touch the real `$HOME` skill directories. Use a temp HOME.

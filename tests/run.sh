@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 INSTALL="$ROOT/install.sh"
 PACK="$ROOT/scripts/pack-check.sh"
+INIT="$ROOT/skills/superplan-init/init.sh"
 
 fails=0
 fixtures=()
@@ -11,6 +12,7 @@ fixtures=()
 REAL_HOME="$HOME"
 real_claude="$(ls -A "$REAL_HOME/.claude/skills" 2>/dev/null || true)"
 real_cursor="$(ls -A "$REAL_HOME/.cursor/skills" 2>/dev/null || true)"
+real_superplan="$(ls -A "$REAL_HOME/.superplan" 2>/dev/null || true)"
 
 PACK_NAMES="audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks superplan-init task-1-plan task-2-execute task-3-complete"
 
@@ -199,6 +201,75 @@ npx skills add
 EOF
 if [[ "$readme_ok" -eq 1 ]]; then
 	ok "README documents install.sh and npx skills add"
+fi
+
+run_cmd "$INIT" --help
+if [[ "$run_code" -eq 0 && "$run_out" == *Usage* ]]; then
+	ok "init.sh --help"
+else
+	not_ok "init.sh --help (code=$run_code)"
+fi
+
+fake_init_home="$(newtmp)"
+ws="$(newtmp)/Claude Plans"
+repo1="$(newtmp)/app"
+mkdir -p "$repo1/.git"
+HOME="$fake_init_home" run_cmd "$INIT" --workspace "$ws" --create-workspace --hub Dummy --repo "$repo1"
+if [[ "$run_code" -eq 0 && -f "$fake_init_home/.superplan/config.yml" && -f "$ws/Dummy/superplan.yml" ]]; then
+	ok "init.sh creates workspace hub and config"
+else
+	not_ok "init.sh create (code=$run_code err=$run_err)"
+fi
+if grep -q 'planning_workspace:' "$fake_init_home/.superplan/config.yml" && grep -q 'merge_prs: false' "$ws/Dummy/superplan.yml" && grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
+	ok "init.sh yaml has workspace, merge_prs false, repo"
+else
+	not_ok "init.sh yaml contents"
+fi
+if [[ ! -e "$ws/Dummy/CLAUDE.md" && ! -e "$ws/Dummy/phases" && ! -e "$ws/Dummy/rules" ]]; then
+	ok "init.sh does not write hub templates"
+else
+	not_ok "init.sh wrote hub templates"
+fi
+
+repo2="$(newtmp)/other"
+mkdir -p "$repo2/.git"
+HOME="$fake_init_home" run_cmd "$INIT" --hub Dummy --repo "$repo2"
+if [[ "$run_code" -eq 0 ]] && grep -q "$repo2" "$ws/Dummy/superplan.yml" && ! grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
+	ok "init.sh reuse hub replaces repos from saved workspace"
+else
+	not_ok "init.sh reuse (code=$run_code err=$run_err)"
+fi
+
+missing_ws="$(newtmp)/no-such-ws"
+HOME="$(newtmp)" run_cmd "$INIT" --workspace "$missing_ws" --hub Dummy
+if [[ "$run_code" -eq 1 && ! -d "$missing_ws" ]]; then
+	ok "init.sh missing workspace without create fails"
+else
+	not_ok "init.sh missing workspace (code=$run_code)"
+fi
+
+disc="$(newtmp)"
+mkdir -p "$disc/keep/.git" "$disc/also/.git" "$disc/skip/notgit"
+run_cmd "$INIT" --discover "$disc"
+if [[ "$run_code" -eq 0 && "$run_out" == *"keep"* && "$run_out" == *"also"* && "$run_out" != *"skip"* ]]; then
+	ok "init.sh --discover lists git children"
+else
+	not_ok "init.sh --discover (code=$run_code out=$run_out err=$run_err)"
+fi
+
+empty_repos_home="$(newtmp)"
+empty_ws="$(newtmp)/ws"
+HOME="$empty_repos_home" run_cmd "$INIT" --workspace "$empty_ws" --create-workspace --hub Dummy
+if [[ "$run_code" -eq 0 ]] && grep -q 'repos: \[\]' "$empty_ws/Dummy/superplan.yml"; then
+	ok "init.sh zero repos writes repos: []"
+else
+	not_ok "init.sh zero repos (code=$run_code err=$run_err)"
+fi
+
+if [[ "$(ls -A "$REAL_HOME/.superplan" 2>/dev/null || true)" == "$real_superplan" ]]; then
+	ok "real ~/.superplan unchanged"
+else
+	not_ok "real ~/.superplan changed"
 fi
 
 empty="$(newtmp)"

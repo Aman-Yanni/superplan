@@ -3,39 +3,89 @@ name: superplan-init
 description: >-
   Create or bind a Superplan planning hub. Use when the user wants to start
   Superplan on a project, pick a planning workspace, or select product repos.
-  Manual only. Full UX is implemented later (T05); this stub must not invent it.
+  Manual only. Asks workspace path first, then hub folder, then product repos;
+  writes ~/.superplan/config.yml and hub superplan.yml.
 disable-model-invocation: true
 model: opus
 effort: high
 ---
 
-# /superplan-init — Bind a planning hub (stub)
+# /superplan-init — Bind a planning hub
 
-Intended sequence (do **not** run it yet):
+Skills stay global. This skill writes **config only**. Hub templates
+(`CLAUDE.md`, `phases/`, `rules/`) are T06 — do not invent them here.
 
-1. Ask for the **planning workspace** path first (save as default).
-2. List existing folders there; reuse one, or create a name the human chooses.
-3. Discover product repos from the current folder or a work-folder path; the
-   human selects which to bind.
+Run the helper next to this file after you have answers:
 
-Hubs are data-only. Skills stay global. Repo rules win on conflict. Close-out
-does not merge unless the human opts in.
+```bash
+init="$(dirname "$SKILL_DIR")/init.sh"   # this skill dir
+# or: ~/.claude/skills/superplan-init/init.sh  (same tree when symlinked)
+```
+
+If `phases/INDEX.md` is missing in cwd, that is normal — **cwd is not the hub**.
+Do not write `phases/` or `rules/` into cwd.
 
 ## Hard constraints
 
-1. **Do not create folders, config files, or hub templates in this stub.**
-2. Do not run `install.sh`. Do not write into `~/.claude/skills` or
-   `~/.cursor/skills`.
-3. Do not invent `~/.superplan/config.yml` or `superplan.yml` yet.
+1. Ask the **planning workspace** path first. Example:
+   `/Users/aman/projects/Claude Plans`. Do not guess ColonyX.
+2. Persist that path in `$HOME/.superplan/config.yml` (`planning_workspace`).
+   Use `"$HOME"`, never `~`, when invoking the helper.
+3. Reuse an existing folder under the workspace before creating one. Suggest a
+   dummy name; do not default to `ColonyX`.
+4. Product repos are selected by the human (discover + pick, or explicit paths).
+5. `merge_prs: false` always in this task. Do not merge. Do not `git remote add`.
+6. Do not run `install.sh` or `npx skills add`. Do not write into
+   `~/.claude/skills` or `~/.cursor/skills`.
+7. Do not write `CLAUDE.md`, `AGENTS.md`, `phases/`, `rules/`, or skill copies.
+8. Tests and live dummy work use temp / dummy folders — do not bind the real
+   ColonyX repos unless the human names that folder.
 
-## What to tell the human
+## Procedure
 
-The full init UX is **T05**. Until that task is done, stop after explaining the
-three steps above. If they already have a hub (for example a ColonyX folder),
-they can open that folder and use the other Superplan skills from there once
-the pack is installed (T03).
+### 1. Planning workspace
+
+If `$HOME/.superplan/config.yml` already has `planning_workspace`, offer it.
+Otherwise ask for the path. If it does not exist, confirm, then pass
+`--create-workspace`.
+
+### 2. Hub folder
+
+List immediate subdirectories of the workspace. The human may:
+
+- reuse one of those names
+- give a new folder name (created under the workspace)
+- give a path they already created
+
+### 3. Product repos
+
+Ask whether to search **cwd** or a work-folder path they give. Run:
+
+```bash
+./init.sh --discover "$search_path"
+```
+
+Show the git dirs found (the search path itself if it has `.git`, plus
+immediate children with `.git`). The human multi-selects, or pastes explicit
+paths. One hub may bind many repos. Zero repos is allowed.
+
+### 4. Write config
+
+```bash
+./init.sh --workspace "$workspace" --hub "$hub" \
+  --create-workspace \
+  --repo "$repo1" --repo "$repo2"
+```
+
+Omit `--create-workspace` if the workspace already exists. Repeat `--repo` for
+each selected path. Omit `--repo` when the selection is empty.
+
+Tell the human what was written: `$HOME/.superplan/config.yml` and
+`<hub>/superplan.yml`. Hub file bodies come in T06.
 
 ## Do not
 
-- Do not create directories, copy templates, or bind repos.
-- Treat cwd as a product repo and write `phases/` into it.
+- Treat cwd as the hub or write `phases/` into a product repo.
+- Copy Superplan skills into the hub.
+- Live-install the pack (T08).
+- Default the hub name to ColonyX.
