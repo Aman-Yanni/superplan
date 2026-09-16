@@ -1,0 +1,63 @@
+---
+description: Claude Code skill directories, frontmatter extensions, additionalDirectories
+globs: "**/.claude/**"
+alwaysApply: false
+---
+
+# Claude Code Rules
+
+## Scope
+
+What this spoke covers:
+
+- Personal skills at `~/.claude/skills/<name>/SKILL.md` (symlinks allowed)
+- Project skills at `.claude/skills/`
+- `settings.json` `permissions.additionalDirectories` for bound product repos
+- Claude frontmatter extensions: `model`, `effort`, `argument-hint`, `allowed-tools`
+
+What this spoke does **not** cover (route elsewhere):
+
+- Portable SKILL.md spec → `agent-skills.mdc`
+- Cursor dirs → `cursor-skills.mdc`
+- Hub layout → `planning-hub.mdc`
+
+## Invariants
+
+1. Global Superplan skills live under `~/.claude/skills/`, not inside each hub.
+2. A planning hub's `.claude/settings.json` lists each bound product repo in
+   `permissions.additionalDirectories`. Without that, Claude Code cannot read
+   those repos from a hub session.
+3. Hub folders are **data-only**: no copies of Superplan skills under the hub's
+   `.claude/skills/`.
+4. Work-loop skills stay `disable-model-invocation: true`. Pin `model` /
+   `effort` to match ColonyX: Opus/high for grill, setup, plan, bootstrap,
+   dialectic; Sonnet/medium for execute, complete, audit.
+5. Never edit a **product repo's** `CLAUDE.md` or `.claude/` without approval.
+   Hub files are Superplan's to write during init.
+
+## Docs (if stuck):
+
+**Docs (if stuck):** https://code.claude.com/docs/en/skills
+
+- Prefer official docs over blog posts. Date-stamp when consulted.
+- last consulted: 2026-09
+
+Also: https://code.claude.com/docs/en/custom-skills
+
+## Problem classes
+
+### `Hub session cannot see product repos`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Claude refuses to read `/Users/.../backend` from the hub | `additionalDirectories` missing or stale | Update hub `.claude/settings.json`; relaunch Claude from the hub |
+
+<!-- last-verified: 2026-09 -->
+
+### `Personal skill shadows the pack`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `/grill-me` runs an old copy | Personal `~/.claude/skills/grill-me` overrides project; leftover copy vs symlink | Remove the extra copy; symlink back to this repo's `skills/grill-me` |
+
+<!-- last-verified: 2026-09 -->

@@ -1,0 +1,132 @@
+# 🚀 Superplan
+
+```text
+ ____                              _
+/ ___| _   _ _ __   ___ _ __ _ __ | | __ _ _ __
+\___ \| | | | '_ \ / _ \ '__| '_ \| |/ _` | '_ \
+ ___) | |_| | |_) |  __/ |  | |_) | | (_| | | | |
+|____/ \__,_| .__/ \___|_|  | .__/|_|\__,_|_| |_|
+            |_|             |_|
+```
+
+## Summary
+
+Superplan is a **global skill pack** for Claude Code and Cursor. It is the ColonyX turboplan port, generalized: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a dummy project without copying skills into that hub.
+
+Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agent rules + phased delivery).
+
+## Table of Contents
+
+- [Summary](#summary)
+- [❗ The problem](#-the-problem)
+- [🛠️ The fix (target)](#️-the-fix-target)
+- [📊 Status](#-status)
+- [📂 Repo layout](#-repo-layout)
+- [📚 Dependencies & docs](#-dependencies--docs)
+- [🔁 Building with Turboplan](#-building-with-turboplan)
+- [🔒 Security / invariants](#-security--invariants)
+- [📜 License / attribution](#-license--attribution)
+
+---
+
+## ❗ The problem
+
+| What you try | What happens |
+| ------------ | ------------ |
+| Copy turboplan skills into every planning folder (ColonyX-style) | Skills drift per project; they only work when that folder is cwd |
+| Use Claude or Cursor on several product repos at once | Each tool wants its own skill dir; hubs and product code get mixed |
+| Install a skill globally | Easy to land in the wrong folder (`~/.agents/skills` vs `~/.cursor/skills`) |
+
+## 🛠️ The fix (target)
+
+- **One pack**, installed globally for **Claude Code and Cursor**.
+- **Planning workspace first** (e.g. `/Users/aman/projects/Claude Plans`), then a per-project hub folder (reuse `ColonyX/` if it exists, or create a name you choose).
+- **Select product repos** by searching the current folder or a work-folder path you give.
+- Hubs are **data-only**: `CLAUDE.md` / `AGENTS.md`, `rules/`, `phases/`. Skills stay global.
+- **Repo rules win.** Hub spokes add routing and cross-repo notes; they do not replace a repo's own docs. Conflicts are reported and asked about.
+- Close-out **does not merge** unless you opt in. No GitHub remote unless you ask.
+
+```text
+you ──► ./install.sh (or npx skills add -g)
+            │  symlink skills/ → ~/.claude/skills
+            │                 → ~/.cursor/skills
+            ▼
+        /superplan-init
+            │  1. planning workspace path
+            │  2. existing hub folder or create one
+            │  3. pick product repos
+            ▼
+        <workspace>/<project>/   (data-only hub)
+            + bound repos on disk (unchanged)
+```
+
+While Superplan itself is being built, prefer **symlink** from this git repo so edits are live. The shipped path is the same installer plus `npx skills add`.
+
+## 📊 Status
+
+| Area | State |
+| ---- | ----- |
+| 🧭 Agent rules (`.cursor/rules/`) | Bootstrapped |
+| 📋 MVP plan (`planning/phases/`) | Seeded — see INDEX |
+| 🛠️ Product code (`skills/`, `install.sh`) | T01 skeleton: help-only `install.sh`, empty `skills/`, `make verify` green |
+| 🧰 Verify | `make verify` (shellcheck + tests + pack-check) passes |
+| 📦 Toolchain | Node v22.18.0 (npx skills consumer only); shellcheck 0.11.0; lefthook 2.1.14 |
+
+## 📂 Repo layout
+
+| Path | For |
+| ---- | --- |
+| [`README.md`](README.md) | 👤 Humans (this file) |
+| [`.cursor/rules/`](.cursor/rules/) | 📜 Conventions for coding agents building Superplan |
+| [`.cursor/skills/`](.cursor/skills/) | 🧩 Plan / execute / complete for **this** repo |
+| [`skills/`](skills/) | 🌍 Published pack (created in T01+, installed globally) |
+| [`install.sh`](install.sh) | 🔗 Humanize-style installer (T01+) |
+| [`templates/hub/`](templates/hub/) | 📁 Data-only hub templates (later tasks) |
+| [`planning/phases/`](planning/phases/) | 🗂️ MVP sequence of record |
+
+## 📚 Dependencies & docs
+
+Human-facing summary. Agents get detail in matching `.cursor/rules/*.mdc` spokes — keep both in sync.
+
+| Dependency | Role | Docs | Agent rules |
+| ---------- | ---- | ---- | ----------- |
+| Agent Skills | `SKILL.md` format and pack layout | [agentskills.io/specification](https://agentskills.io/specification) | [`.cursor/rules/agent-skills.mdc`](.cursor/rules/agent-skills.mdc) |
+| skills CLI | `npx skills add -g` distribution | [github.com/vercel-labs/skills](https://github.com/vercel-labs/skills) | [`.cursor/rules/skills-cli.mdc`](.cursor/rules/skills-cli.mdc) |
+| Claude Code | Personal skills + `additionalDirectories` | [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) | [`.cursor/rules/claude-code.mdc`](.cursor/rules/claude-code.mdc) |
+| Cursor Skills | Personal `~/.cursor/skills` | [cursor.com/docs/skills](https://cursor.com/docs/skills) | [`.cursor/rules/cursor-skills.mdc`](.cursor/rules/cursor-skills.mdc) |
+| Planning hub | Workspace, data-only hubs, repo-rules-first | ColonyX `README.md` / `CLAUDE.md` | [`.cursor/rules/planning-hub.mdc`](.cursor/rules/planning-hub.mdc) |
+| install.sh | Agent-select symlink installer | [humanize install.sh](https://github.com/harshaneel/humanize/blob/main/install.sh) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
+| shellcheck / lefthook | Lint + pre-commit verify | [shellcheck wiki](https://www.shellcheck.net/wiki/) · [lefthook](https://lefthook.dev/) | [`.cursor/rules/shell.mdc`](.cursor/rules/shell.mdc) |
+
+## 🔁 Building with [Turboplan](https://github.com/commoddity/turboplan)
+
+Work proceeds one phase task at a time. Full methodology:
+[github.com/commoddity/turboplan](https://github.com/commoddity/turboplan).
+
+```
+  📝 /task-1-plan TXX
+        ↓
+  🛠️  /task-2-execute TXX
+        ↓
+  ✅ /task-3-complete TXX → commit + push if origin exists + Manual test
+```
+
+See [`planning/phases/INDEX.md`](planning/phases/INDEX.md).
+
+First action after reviewing this bootstrap: `/task-1-plan T01`.
+
+## 🔒 Security / invariants
+
+- Secrets stay out of git (`.env`, credentials). Tests use a fake `HOME`.
+- Do not overwrite unrelated skills in `~/.claude/skills` or `~/.cursor/skills`.
+- Never edit a bound product repo's own rules without approval; repo docs win on conflict.
+- Close-out never merges unless you opt in. No remotes created by default.
+- Global skills must not write `phases/` into a product repo — the hub path comes from config.
+
+## 📜 License / attribution
+
+Methodology and original skills: [commoddity/turboplan](https://github.com/commoddity/turboplan) (MIT).
+
+Claude-side multi-repo port this product generalizes: local ColonyX hub at `/Users/aman/projects/Claude Plans/ColonyX`.
+
+Installer shape: [harshaneel/humanize `install.sh`](https://github.com/harshaneel/humanize/blob/main/install.sh).

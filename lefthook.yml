@@ -1,0 +1,9 @@
+# https://lefthook.dev/
+# Install once: make install-hooks   (or: lefthook install)
+# Bootstrap AC: pre-commit MUST run the full verify suite (lint + test + build).
+
+pre-commit:
+  parallel: false
+  commands:
+    verify:
+      run: make verify

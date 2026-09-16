@@ -1,0 +1,35 @@
+# --- secrets / env ---
+.env
+.env.*
+!.env.example
+!.env.ref
+!.env.*.example
+
+# --- local scratch ---
+tmp/
+temp/
+*.tmp
+*.swp
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- editors / IDE ---
+.idea/
+.vscode/
+*.code-workspace
+
+# --- logs / coverage ---
+*.log
+coverage/
+*.out
+*.cover
+
+# --- installer test fixtures (created under tmp/) ---
+dist/
+
+# --- Node (npx skills may drop these; Superplan is not a Node app) ---
+node_modules/
+package-lock.json

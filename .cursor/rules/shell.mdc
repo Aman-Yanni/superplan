@@ -1,0 +1,88 @@
+---
+description: POSIX shell, shellcheck, tests, and make verify for Superplan
+globs: "**/*.sh,Makefile,.shellcheckrc"
+alwaysApply: false
+---
+
+# Shell / Verify Rules
+
+## Scope
+
+What this spoke covers:
+
+- `install.sh` and `tests/*.sh` craft
+- shellcheck, `make verify` (= lint + test + pack-check)
+
+What this spoke does **not** cover (route elsewhere):
+
+- Installer product behavior → `install.mdc`
+- SKILL.md validation rules beyond pack-check → `agent-skills.mdc`
+
+## Invariants
+
+1. Scripts use `set -euo pipefail` (bash) or equivalent strict POSIX.
+2. `make verify` is lint + test + build. **lint** = shellcheck on `install.sh`
+   and `tests/*.sh`. **test** = `tests/run.sh`. **build** = pack-check (every
+   `skills/*/SKILL.md` present and named correctly; empty `skills/` is OK until
+   the pack task lands).
+3. Lint config is **`.shellcheckrc`**, not `.golangci.yml`. Execute/complete
+   hard-abort if Makefile / lefthook / `.shellcheckrc` are missing.
+4. Tests must not touch the real `$HOME` skill directories. Use a temp HOME.
+5. No Go, no `go test`, no Node test runner unless a later task adds one.
+6. Walk skill/pack subdirs with `shopt -s nullglob` and `for dir in "$root"/*/`.
+   Do not assign an empty glob to an array and expand it under `set -u`.
+7. Tests that expect a non-zero exit must capture status (`cmd || code=$?`).
+   Do not write `cmd; echo $?` under `set -e`.
+8. Pack-check (and git) treat only **subdirectories** as skills. A placeholder
+   file in an otherwise empty pack dir is required so git tracks the directory.
+
+## Docs (if stuck):
+
+**Docs (if stuck):** https://www.shellcheck.net/wiki/
+
+- Prefer official docs over blog posts. Date-stamp when consulted.
+- last consulted: 2026-09
+
+Also: https://lefthook.dev/
+
+## Problem classes
+
+### `Verify skipped because there is no Go`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Task marked green after informal script run | Makefile still a Go skeleton, or unit tests alone counted as verify | Restore POSIX Makefile: `verify: lint test build` with shellcheck + `tests/run.sh` + pack-check |
+
+<!-- last-verified: 2026-09 -->
+
+### `Test installed into the real home`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `~/.claude/skills` changed during `make test` | Script used `$HOME` instead of a fixture | Export `HOME` to a temp dir in tests; assert only that tree |
+
+<!-- last-verified: 2026-09 -->
+
+### `Empty glob aborts under set -u`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Script dies on an empty pack/dir with `unbound variable` | Empty glob stored in an array, then `"${arr[@]}"` under `set -u` (bash 3.2) | `shopt -s nullglob`; `for dir in "$root"/*/`; skip files; do not expand an empty array |
+
+<!-- last-verified: 2026-09 -->
+
+### `Expected failure aborts the test runner`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Test script exits before asserting a non-zero status | `set -e` plus `cmd; echo $?` | `code=0; cmd || code=$?` then assert `$code` |
+
+<!-- last-verified: 2026-09 -->
+
+### `Empty pack directory is untracked`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `skills/` missing after clone / first commit | Git does not store empty directories | Keep a non-skill placeholder file in the pack dir; pack-check ignores files and only requires `SKILL.md` inside subdirectories |
+
+<!-- last-verified: 2026-09 -->

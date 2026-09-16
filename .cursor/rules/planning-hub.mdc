@@ -1,0 +1,87 @@
+---
+description: Planning workspace, data-only hubs, bound repos, repo-rules-first
+globs: "templates/hub/**,**/superplan.yml"
+alwaysApply: false
+---
+
+# Planning Hub Rules
+
+## Scope
+
+What this spoke covers:
+
+- Planning workspace path (asked first)
+- Per-project hub folders (create or reuse)
+- Binding one or more product repos
+- Repo-rules-first, conflict handling, merge default
+
+What this spoke does **not** cover (route elsewhere):
+
+- How skills get onto the machine → `install.mdc` / `skills-cli.mdc`
+- Claude `additionalDirectories` mechanics → `claude-code.mdc`
+
+## Invariants
+
+1. **Skills are global. Hubs are data.** A hub holds `CLAUDE.md`/`AGENTS.md`,
+   `rules/`, `phases/`, `templates/`, and a small config (`superplan.yml`).
+   It does not copy Superplan skills.
+2. **Planning workspace first.** Init asks for the workspace path (example:
+   `/Users/aman/projects/Claude Plans`) and saves it as the default. Then it
+   deals with the project folder inside that workspace.
+3. **Reuse before create.** If `<workspace>/<name>/` already exists, reuse it.
+   If it does not, suggest a folder name, or let the user name it, or accept a
+   path they already created.
+4. **Product repos are selected, not guessed.** Either search the current
+   folder (or a work-folder path the user gives) for project directories and
+   let the user pick, or accept explicit paths. One hub may bind many repos.
+5. **Repo rules come first.** For each bound repo, read its own
+   `CLAUDE.md` / `AGENTS.md` / `.cursor/rules` / tests / CI **before** hub
+   spokes. Order: **repo sources > hub `rules/` > Superplan defaults**. On
+   conflict: follow the repo, tell the human, and ask if a decision is needed.
+   Hub spokes may add routing and cross-repo knowledge; they do not replace
+   repo docs.
+6. **Close-out never merges** unless that hub's config (or the invocation)
+   opts in. Default: open PRs, stop. Do not create remotes unless the user
+   asks.
+7. Global skills must **resolve the hub from config**, not from cwd. Writing
+   `phases/` into a product repo is a bug.
+
+## Init sequence (product)
+
+```
+1. Planning workspace path → save default
+2. List existing folders there → select or create <project>/
+3. Discover product repos (cwd search OR work-folder path) → user selects
+4. Write or refresh the data-only hub; bind repos; agent access config
+```
+
+Saved default (target): `~/.superplan/config.yml` → `planning_workspace`.
+Per hub (target): `<hub>/superplan.yml` → repos, `merge_prs: false`.
+
+## Docs (if stuck):
+
+**Docs (if stuck):** `/Users/aman/projects/Claude Plans/ColonyX/README.md`
+
+- ColonyX is the Claude-side port this product generalizes (skills-in-hub →
+  skills-global + data-only hub).
+- last consulted: 2026-09
+
+Also: ColonyX `CLAUDE.md` (repo-rules-first, additionalDirectories).
+
+## Problem classes
+
+### `Skill used cwd as the hub`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub | Resolve hub from `~/.superplan/config.yml` + `superplan.yml`; refuse to write hub files into a bound product repo |
+
+<!-- last-verified: 2026-09 -->
+
+### `Hub overrode the repo`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Plan or edit contradicts the repo's CLAUDE.md / tests | Hub spoke or Superplan default used instead of repo sources | Re-read the repo; follow it; report the conflict; ask the human if a rule change is needed |
+
+<!-- last-verified: 2026-09 -->

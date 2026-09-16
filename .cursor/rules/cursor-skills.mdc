@@ -1,0 +1,61 @@
+---
+description: Cursor personal vs project skills and global install destinations
+globs: "**/.cursor/skills/**"
+alwaysApply: false
+---
+
+# Cursor Skills Rules
+
+## Scope
+
+What this spoke covers:
+
+- Personal (global) skills: `~/.cursor/skills/<name>/`
+- Project skills: `.cursor/skills/` and `.agents/skills/`
+- Compatibility loads from `~/.claude/skills/` as well
+
+What this spoke does **not** cover (route elsewhere):
+
+- SKILL.md format → `agent-skills.mdc`
+- Claude additionalDirectories → `claude-code.mdc`
+- install.sh behavior → `install.mdc`
+
+## Invariants
+
+1. Users get Superplan from **personal** skills (`~/.cursor/skills/`), so the
+   pack is available in every workspace — including a planning hub and every
+   bound product repo.
+2. Never write published pack skills into `~/.cursor/skills-cursor/` (Cursor
+   built-ins).
+3. This repo's `.cursor/skills/` is the **build loop for Superplan**, not the
+   pack users install. Installing the pack globally must not overwrite these
+   names in a way that breaks developing Superplan: the pack lives under
+   `skills/` and is what gets symlinked.
+4. Create `~/.cursor/skills/` if missing. Confirm `SKILL.md` is reachable after
+   install (`test -f ~/.cursor/skills/grill-me/SKILL.md`).
+5. Cloud Agents do not see unsynced personal skills; local Agent sessions do.
+
+## Docs (if stuck):
+
+**Docs (if stuck):** https://cursor.com/docs/skills
+
+- Prefer official docs over blog posts. Date-stamp when consulted.
+- last consulted: 2026-09
+
+## Problem classes
+
+### `Global skill missing in Cursor`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `/grill-me` not in `/` picker | Install landed in `~/.agents/skills` only, or `~/.cursor/skills` never created | Symlink each pack skill into `~/.cursor/skills/<name>`; do not use skills-cursor |
+
+<!-- last-verified: 2026-09 -->
+
+### `Build loop vs published pack confusion`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Editing `.cursor/skills/task-1-plan` does not change the global `/task-1-plan` | Those are different trees | Edit `skills/task-1-plan` for the pack; `.cursor/skills` is Superplan's own loop |
+
+<!-- last-verified: 2026-09 -->

@@ -1,0 +1,60 @@
+---
+description: skills.sh / npx skills CLI — install, agents, global vs project
+globs: "README.md,install.sh"
+alwaysApply: false
+---
+
+# skills CLI (skills.sh) Rules
+
+## Scope
+
+What this spoke covers:
+
+- `npx skills add|ls|remove|update` as the published install path
+- Agent flags (`-a claude-code -a cursor`), global (`-g`), symlink vs `--copy`
+
+What this spoke does **not** cover (route elsewhere):
+
+- Superplan's own `install.sh` → `install.mdc`
+- SKILL.md format → `agent-skills.mdc`
+
+## Invariants
+
+1. Authoring install is `./install.sh` (symlink, no Node). Shipped install is
+   also `npx skills add <owner>/superplan -g` with agent selection.
+2. Always pass `-a claude-code -a cursor` (or let the CLI prompt). Do not rely
+   on auto-detect alone — Cursor global dest has historically been wrong
+   (`~/.agents/skills` vs `~/.cursor/skills`).
+3. After any `npx skills add -g`, verify **both** destinations exist:
+   `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (symlink or copy).
+4. Default mode is symlink. `--copy` only when the user asks or the filesystem
+   cannot symlink.
+5. Do not publish to the skills.sh registry or create a GitHub remote unless
+   the user asks.
+
+## Docs (if stuck):
+
+**Docs (if stuck):** https://github.com/vercel-labs/skills
+
+- Prefer official docs over blog posts. Date-stamp when consulted.
+- last consulted: 2026-09
+
+Also: https://www.npmjs.com/package/skills · https://skills.sh
+
+## Problem classes
+
+### `Cursor global install not loaded`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Skill listed for Claude but missing in Cursor | CLI wrote `~/.agents/skills` and skipped `~/.cursor/skills` | Install with `-a cursor -g`; confirm `ls ~/.cursor/skills/<name>/SKILL.md` |
+
+<!-- last-verified: 2026-09 -->
+
+### `Project install instead of global`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Skills appear only in one repo | `npx skills add` without `-g` writes `./.agents/skills` or `./.claude/skills` | Re-run with `-g`; Superplan is a **global** pack |
+
+<!-- last-verified: 2026-09 -->

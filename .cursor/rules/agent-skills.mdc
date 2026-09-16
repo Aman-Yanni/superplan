@@ -1,0 +1,66 @@
+---
+description: Agent Skills format, frontmatter, and published pack layout
+globs: "skills/**/SKILL.md,**/SKILL.md"
+alwaysApply: false
+---
+
+# Agent Skills Rules
+
+## Scope
+
+What this spoke covers:
+
+- `SKILL.md` shape, frontmatter, and progressive disclosure
+- Canonical published pack under `skills/<name>/`
+- Dual-agent frontmatter (portable spec + Claude/Cursor extensions)
+
+What this spoke does **not** cover (route elsewhere):
+
+- `npx skills add` discovery and agent dirs → `skills-cli.mdc`
+- Claude-only settings / additionalDirectories → `claude-code.mdc`
+- Cursor personal vs project dirs → `cursor-skills.mdc`
+
+## Invariants
+
+1. Each published skill is `skills/<name>/SKILL.md`. `name` in frontmatter
+   matches the directory. No root `SKILL.md` (that stops `npx skills` from
+   walking the pack unless `--full-depth`).
+2. Portable frontmatter (required by the spec): `name`, `description`. Optional
+   spec fields: `license`, `compatibility`, `metadata`, `allowed-tools`.
+3. Superplan work-loop skills are **manual only**: set
+   `disable-model-invocation: true` so they run when the user types `/name`.
+4. Claude-only keys (`model`, `effort`, `argument-hint`) live in the same file;
+   Cursor ignores unknown keys. Do not split into two SKILL.md files.
+5. Keep `SKILL.md` under ~500 lines; move long reference into `references/`.
+6. `.cursor/skills/` is this repo's build loop. `skills/` is what users install.
+   Do not copy one tree into the other.
+7. An empty pack (zero skill subdirectories) is valid. Git will not track that
+   directory without a non-skill placeholder file. Pack-check must ignore files
+   and only require `SKILL.md` inside subdirectories.
+
+## Docs (if stuck):
+
+**Docs (if stuck):** https://agentskills.io/specification
+
+- Prefer official docs over blog posts. Date-stamp when consulted.
+- last consulted: 2026-09
+
+Also: https://agentskills.io
+
+## Problem classes
+
+### `Root SKILL.md hides the pack`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `npx skills add` installs one skill or none | A `SKILL.md` at repo root stops the default walk | Keep skills only under `skills/<name>/`; no root SKILL.md |
+
+<!-- last-verified: 2026-09 -->
+
+### `Frontmatter name ≠ folder`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Agent cannot find `/grill-me` or install name mismatches | `name:` does not match parent directory | Rename folder or `name:` so they match; lowercase + hyphens only |
+
+<!-- last-verified: 2026-09 -->
