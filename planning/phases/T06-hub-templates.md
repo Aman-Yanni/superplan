@@ -1,6 +1,6 @@
 # T06 — Hub templates
 
-**Status**: Pending
+**Status**: Done
 **Parent INDEX**: [INDEX.md](./INDEX.md)
 **Depends-on**: T05
 **Next**: T07
@@ -15,14 +15,17 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 | Timestamp | Event | From | To | Details | User |
 | --------- | ----- | ---- | -- | ------- | ---- |
 | 2026-09-16 | created | — | Pending | stub seeded by bootstrap | |
+| 2026-09-16 | planned | Pending | Planned | /task-1-plan | |
+| 2026-09-16 | execute | Planned | InProgress | /task-2-execute | |
+| 2026-09-16 | complete | InProgress | Done | /task-3-complete | |
 
 ## Requirements
 
-- [ ] Templates live in this repo under `templates/hub/`
-- [ ] Generated hub has no `.claude/skills/` or `.cursor/skills/` pack copies
-- [ ] Repos table + verify-gates section are filled from what init discovered (or “none established”)
-- [ ] Repo-rules-first wording matches ColonyX hub `CLAUDE.md` (generalized)
-- [ ] Refreshing an existing hub does not wipe user `rules/` entries
+- [x] Templates live in this repo under `templates/hub/`
+- [x] Generated hub has no `.claude/skills/` or `.cursor/skills/` pack copies
+- [x] Repos table + verify-gates section are filled from what init discovered (or “none established”)
+- [x] Repo-rules-first wording matches ColonyX hub `CLAUDE.md` (generalized)
+- [x] Refreshing an existing hub does not wipe user `rules/` entries
 
 ## Implementation Plan
 
@@ -36,30 +39,27 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 
 ## Execution plan (filled by /task-1-plan)
 
-**Date:**
-**Codebase snapshot:**
-**Execute model:** small/default | large (only if justified)
+**Date:** 2026-09-16
+**Codebase snapshot:** T05 (`c11f7be`) on `T06-hub-templates`. Init writes config only. `templates/hub/` missing.
+**Execute model:** small
 
 ### Context for executor
-- …
+
+Add `templates/hub/` (generalized ColonyX hub, no skill copies). Extend `init.sh` to write them. Refresh must not delete existing `rules/*.md`. Gates default to “none established”. Cursor note in `CURSOR.md`.
 
 ### Steps
-1. … → verify: …
 
-### Tests to add
-- …
-
-### Verify commands
-- …
-
-### Risks / pitfalls
-- …
+1. Author templates under `templates/hub/`. → verify: files exist
+2. `init.sh` copies/generates into the hub. → verify: tests
+3. Update T05 “no templates” assertion. → verify: `make verify`
 
 ### Out of scope
-- …
+
+T07 hub resolution. T08 live install. ColonyX bind.
 
 ### Execute model recommendation
-- default (small/cheap) | large — rationale: …
+
+- small
 
 ## Test Plan
 
@@ -69,29 +69,48 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 
 ## Acceptance Criteria
 
-- [ ] Data-only hub written from templates
-- [ ] No pack skills copied into the hub
-- [ ] Tests added/updated for new behavior
-- [ ] Full lint + test verify suite green
-- [ ] Verification commands recorded and passing
-- [ ] No secrets committed
+- [x] Data-only hub written from templates
+- [x] No pack skills copied into the hub
+- [x] Tests added/updated for new behavior
+- [x] Full lint + test verify suite green
+- [x] Verification commands recorded and passing
+- [x] No secrets committed
 
 ## Verification
 
-*(Filled by `/task-2-execute`; re-confirmed by `/task-3-complete`)*
+`make verify` (2026-09-16): init writes `CLAUDE.md` / `AGENTS.md` / `phases/INDEX.md` / `rules/cross-repo.md` / `.claude/settings.json`; no `.claude/skills` or `.cursor/skills`; refresh keeps `rules/keep.md`; repo path in additionalDirectories.
 
 ## Files Modified
 
-*(Filled by `/task-2-execute`)*
+- `templates/hub/**`
+- `skills/superplan-init/init.sh`
+- `skills/superplan-init/SKILL.md`
+- `tests/run.sh`
+- `planning/phases/T06-hub-templates.md`
+- `planning/phases/INDEX.md`
+- `README.md`
+- `planning/phases/T07-hub-resolution.md`
 
 ## Manual test (for humans)
 
-*(Filled by `/task-3-complete`)*
+```bash
+fake="$(mktemp -d)"
+repo="$fake/app"
+mkdir -p "$repo/.git"
+HOME="$fake" ./skills/superplan-init/init.sh \
+  --workspace "$fake/Plans" --create-workspace --hub Dummy --repo "$repo"
+ls "$fake/Plans/Dummy"
+test ! -e "$fake/Plans/Dummy/.claude/skills"
+cat "$fake/Plans/Dummy/.claude/settings.json"
+```
+
+Success: data-only hub files present; settings list the repo; no skill copies.
 
 ## Learnings
 
-*(Filled by `/task-3-complete` / dialectic)*
+- Mode A: skipped.
+- Mode B: hub templates live in `templates/hub/`; refresh uses copy-if-missing for `rules/`; Claude `additionalDirectories` vs Cursor workspace folders.
 
 ## Reality notes
 
-T05 shipped `skills/superplan-init/init.sh`, which writes `$HOME/.superplan/config.yml` and `<hub>/superplan.yml` (`merge_prs: false`, `repos:`) and creates the hub directory. It does **not** write `CLAUDE.md`, `AGENTS.md`, `phases/`, or `rules/`. T06 adds `templates/hub/` and extends init (or a follow-on write) to fill those without wiping `superplan.yml` or later user `rules/` entries. No skill copies in the hub.
+Init now writes hub bodies. T07 must stop treating cwd as the hub and resolve from `$HOME/.superplan/config.yml` + hub `superplan.yml`.

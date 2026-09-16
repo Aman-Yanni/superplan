@@ -220,15 +220,27 @@ if [[ "$run_code" -eq 0 && -f "$fake_init_home/.superplan/config.yml" && -f "$ws
 else
 	not_ok "init.sh create (code=$run_code err=$run_err)"
 fi
-if grep -q 'planning_workspace:' "$fake_init_home/.superplan/config.yml" && grep -q 'merge_prs: false' "$ws/Dummy/superplan.yml" && grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
-	ok "init.sh yaml has workspace, merge_prs false, repo"
+if grep -q 'planning_workspace:' "$fake_init_home/.superplan/config.yml" && grep -q 'hub:' "$fake_init_home/.superplan/config.yml" && grep -q 'merge_prs: false' "$ws/Dummy/superplan.yml" && grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
+	ok "init.sh yaml has workspace, hub, merge_prs false, repo"
 else
 	not_ok "init.sh yaml contents"
 fi
-if [[ ! -e "$ws/Dummy/CLAUDE.md" && ! -e "$ws/Dummy/phases" && ! -e "$ws/Dummy/rules" ]]; then
-	ok "init.sh does not write hub templates"
+if [[ -f "$ws/Dummy/CLAUDE.md" && -f "$ws/Dummy/AGENTS.md" && -f "$ws/Dummy/phases/INDEX.md" && -f "$ws/Dummy/rules/cross-repo.md" && -f "$ws/Dummy/.claude/settings.json" ]]; then
+	ok "init.sh writes data-only hub templates"
 else
-	not_ok "init.sh wrote hub templates"
+	not_ok "init.sh missing hub templates"
+fi
+if [[ ! -e "$ws/Dummy/.claude/skills" && ! -e "$ws/Dummy/.cursor/skills" ]] && grep -q 'Repo rules come first' "$ws/Dummy/CLAUDE.md" && grep -q "$repo1" "$ws/Dummy/.claude/settings.json"; then
+	ok "init.sh hub has no skill copies and lists the repo"
+else
+	not_ok "init.sh hub skills or additionalDirectories"
+fi
+printf 'keep-me\n' >"$ws/Dummy/rules/keep.md"
+HOME="$fake_init_home" run_cmd "$INIT" --hub Dummy --repo "$repo1"
+if [[ -f "$ws/Dummy/rules/keep.md" ]] && grep -q 'keep-me' "$ws/Dummy/rules/keep.md"; then
+	ok "init.sh refresh preserves user rules"
+else
+	not_ok "init.sh wiped user rules"
 fi
 
 repo2="$(newtmp)/other"
@@ -344,6 +356,23 @@ if [[ "$got" == "$exp_sorted" ]]; then
 	ok "repo has exactly 9 pack skill dirs"
 else
 	not_ok "repo pack dirs mismatch (got=$got)"
+fi
+
+hubres="$ROOT/skills/grill-me/references/hub-resolution.md"
+if [[ -f "$hubres" ]]; then
+	hub_ok=1
+	for s in audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks task-1-plan task-2-execute task-3-complete; do
+		f="$ROOT/skills/$s/references/hub-resolution.md"
+		if [[ ! -f "$f" ]] || ! cmp -s "$hubres" "$f"; then
+			not_ok "hub-resolution missing or differs in $s"
+			hub_ok=0
+		fi
+	done
+	if [[ "$hub_ok" -eq 1 ]]; then
+		ok "pack skills share hub-resolution.md"
+	fi
+else
+	not_ok "grill-me hub-resolution.md missing"
 fi
 
 if [[ "$fails" -ne 0 ]]; then

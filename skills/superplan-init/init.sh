@@ -41,6 +41,106 @@ discover() {
 	done
 }
 
+json_quote() {
+	local s=$1
+	s=${s//\\/\\\\}
+	s=${s//\"/\\\"}
+	printf '"%s"' "$s"
+}
+
+copy_if_missing() {
+	local src=$1 dest=$2
+	if [[ ! -e "$dest" ]]; then
+		mkdir -p "$(dirname "$dest")"
+		cp "$src" "$dest"
+	fi
+}
+
+context_sources() {
+	local r=$1
+	local bits=""
+	if [[ -f "$r/CLAUDE.md" ]]; then
+		bits="\`CLAUDE.md\`"
+	fi
+	if [[ -f "$r/AGENTS.md" ]]; then
+		if [[ -n "$bits" ]]; then
+			bits="$bits; \`AGENTS.md\`"
+		else
+			bits="\`AGENTS.md\`"
+		fi
+	fi
+	if [[ -z "$bits" ]]; then
+		printf 'none established'
+	else
+		printf '%s' "$bits"
+	fi
+}
+
+write_hub_files() {
+	local pack_root tpl hub_name table routing gates name r out
+	pack_root="$(cd "$(dirname "$0")/../.." && pwd)"
+	tpl="$pack_root/templates/hub"
+	if [[ ! -d "$tpl" ]]; then
+		echo "init: missing templates at $tpl" >&2
+		exit 1
+	fi
+	hub_name="$(basename "$hub")"
+	mkdir -p "$hub/rules" "$hub/phases" "$hub/templates" "$hub/.claude"
+	copy_if_missing "$tpl/rules/cross-repo.md" "$hub/rules/cross-repo.md"
+	copy_if_missing "$tpl/templates/task.md" "$hub/templates/task.md"
+	copy_if_missing "$tpl/templates/rule-spoke.md" "$hub/templates/rule-spoke.md"
+	copy_if_missing "$tpl/CURSOR.md" "$hub/CURSOR.md"
+	table=""
+	routing=""
+	gates=""
+	if [[ "${#resolved_repos[@]}" -eq 0 ]]; then
+		table='| — | — | none established | none established |'
+		gates='none established'
+	else
+		for r in "${resolved_repos[@]}"; do
+			name="$(basename "$r")"
+			table+="| ${name} | \`${r}\` | $(context_sources "$r") | none established |"
+			table+=$'\n'
+			routing+="| \`${name}\` | \`rules/${name}.md\` |"
+			routing+=$'\n'
+			gates+="**${name}** — none established"
+			gates+=$'\n\n'
+			copy_if_missing "$tpl/rules/repo.md" "$hub/rules/${name}.md"
+		done
+	fi
+	out="$(cat "$tpl/CLAUDE.md")"
+	out="${out//@@HUB_NAME@@/$hub_name}"
+	out="${out//@@REPOS_TABLE@@/$table}"
+	out="${out//@@ROUTING_ROWS@@/$routing}"
+	out="${out//@@VERIFY_GATES@@/$gates}"
+	printf '%s' "$out" >"$hub/CLAUDE.md"
+	out="$(cat "$tpl/AGENTS.md")"
+	out="${out//@@HUB_NAME@@/$hub_name}"
+	printf '%s' "$out" >"$hub/AGENTS.md"
+	if [[ ! -e "$hub/phases/INDEX.md" ]]; then
+		out="$(cat "$tpl/phases/INDEX.md")"
+		out="${out//@@HUB_NAME@@/$hub_name}"
+		printf '%s' "$out" >"$hub/phases/INDEX.md"
+	fi
+	{
+		printf '{\n  "permissions": {\n    "additionalDirectories": ['
+		local first=1
+		for r in "${resolved_repos[@]+"${resolved_repos[@]}"}"; do
+			if [[ "$first" -eq 1 ]]; then
+				first=0
+				printf '\n      '
+			else
+				printf ',\n      '
+			fi
+			json_quote "$r"
+		done
+		if [[ "$first" -eq 0 ]]; then
+			printf '\n    '
+		fi
+		printf ']\n  }\n}\n'
+	} >"$hub/.claude/settings.json"
+}
+
 CONFIG_DIR_REL=".superplan"
 workspace=""
 hub_arg=""
@@ -143,6 +243,9 @@ mkdir -p "$HOME/$CONFIG_DIR_REL"
 	printf 'planning_workspace: '
 	yaml_quote "$workspace"
 	printf '\n'
+	printf 'hub: '
+	yaml_quote "$hub"
+	printf '\n'
 } >"$config_file"
 
 {
@@ -158,6 +261,8 @@ mkdir -p "$HOME/$CONFIG_DIR_REL"
 		done
 	fi
 } >"$hub/superplan.yml"
+
+write_hub_files
 
 printf 'init: workspace %s\n' "$workspace"
 printf 'init: hub %s\n' "$hub"

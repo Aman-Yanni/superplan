@@ -12,7 +12,7 @@
 | T03 | [install.sh](./T03-install-sh.md) | ✅ | T02 | T04 | L2 | Humanize-style; symlink default |
 | T04 | [skills.sh packaging](./T04-skills-cli-packaging.md) | ✅ | T03 | T05 | L3 | `npx skills add` compatible |
 | T05 | [/superplan-init](./T05-superplan-init.md) | ✅ | T04 | T06 | L4 | Workspace → hub folder → repos |
-| T06 | [Hub templates](./T06-hub-templates.md) | Pending | T05 | T07 | L5 | Data-only; no skill copies |
+| T06 | [Hub templates](./T06-hub-templates.md) | ✅ | T05 | T07 | L5 | Data-only; no skill copies |
 | T07 | [Hub resolution](./T07-hub-resolution.md) | Pending | T06 | T08 | L6 | Global skills find the hub |
 | T08 | [E2E dummy project](./T08-e2e-dummy.md) | Pending | T07 | — | L7 | Live install + dummy hub |
 

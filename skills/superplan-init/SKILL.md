@@ -12,8 +12,8 @@ effort: high
 
 # /superplan-init — Bind a planning hub
 
-Skills stay global. This skill writes **config only**. Hub templates
-(`CLAUDE.md`, `phases/`, `rules/`) are T06 — do not invent them here.
+Skills stay global. This skill writes hub **config and data-only templates**.
+Do not copy Superplan skills into the hub folder.
 
 Run the helper next to this file after you have answers:
 
@@ -37,7 +37,9 @@ Do not write `phases/` or `rules/` into cwd.
 5. `merge_prs: false` always in this task. Do not merge. Do not `git remote add`.
 6. Do not run `install.sh` or `npx skills add`. Do not write into
    `~/.claude/skills` or `~/.cursor/skills`.
-7. Do not write `CLAUDE.md`, `AGENTS.md`, `phases/`, `rules/`, or skill copies.
+7. Write data-only hub files from `templates/hub/` (`CLAUDE.md`, `AGENTS.md`,
+   `phases/INDEX.md` if missing, `rules/` stubs if missing). Do not copy
+   Superplan skills into the hub. Do not wipe existing `rules/*.md`.
 8. Tests and live dummy work use temp / dummy folders — do not bind the real
    ColonyX repos unless the human names that folder.
 
@@ -80,8 +82,9 @@ paths. One hub may bind many repos. Zero repos is allowed.
 Omit `--create-workspace` if the workspace already exists. Repeat `--repo` for
 each selected path. Omit `--repo` when the selection is empty.
 
-Tell the human what was written: `$HOME/.superplan/config.yml` and
-`<hub>/superplan.yml`. Hub file bodies come in T06.
+Tell the human what was written: `$HOME/.superplan/config.yml`,
+`<hub>/superplan.yml`, and the data-only hub files. Existing `rules/*.md` are
+kept.
 
 ## Do not
 
