@@ -181,6 +181,26 @@ else
 	not_ok "real ~/.cursor/skills changed"
 fi
 
+readme="$ROOT/README.md"
+readme_ok=1
+while IFS= read -r needle; do
+	if ! grep -q -F -- "$needle" "$readme"; then
+		not_ok "README missing $needle"
+		readme_ok=0
+	fi
+done <<'EOF'
+./install.sh
+npx skills add
+--list
+-g
+-a claude-code
+-a cursor
+~/.cursor/skills
+EOF
+if [[ "$readme_ok" -eq 1 ]]; then
+	ok "README documents install.sh and npx skills add"
+fi
+
 empty="$(newtmp)"
 run_cmd "$PACK" "$empty"
 if [[ "$run_code" -eq 0 ]]; then

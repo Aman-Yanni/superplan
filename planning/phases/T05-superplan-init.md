@@ -97,3 +97,5 @@ Implement `/superplan-init` in the published pack: ask for the **planning worksp
 ## Reality notes
 
 T02 shipped `skills/superplan-init/SKILL.md` as a stub that explains the three-step sequence and says T05 implements it. Replace that stub; do not keep the “stop after explaining T05” body.
+
+T04 documented `./install.sh` and `npx skills add . --list` / `-g -a claude-code -a cursor`. Init still must not live-install; it writes hub config under a workspace path the human gives (tests: temp dirs, not the real Claude Plans folder).

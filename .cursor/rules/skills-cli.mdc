@@ -31,6 +31,10 @@ What this spoke does **not** cover (route elsewhere):
    cannot symlink.
 5. Do not publish to the skills.sh registry or create a GitHub remote unless
    the user asks.
+6. Discovery without installing is `npx skills add . --list` (local path must
+   be `.`, `./`, or absolute). Do not put `npx` in `make verify`.
+7. After any `npx skills add -g`, confirm `~/.cursor/skills/<name>/SKILL.md`
+   exists. If it does not, the CLI likely wrote `~/.agents/skills` only.
 
 ## Docs (if stuck):
 
@@ -56,5 +60,13 @@ Also: https://www.npmjs.com/package/skills · https://skills.sh
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
 | Skills appear only in one repo | `npx skills add` without `-g` writes `./.agents/skills` or `./.claude/skills` | Re-run with `-g`; Superplan is a **global** pack |
+
+<!-- last-verified: 2026-09 -->
+
+### `npx add without --list live-installs`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Real `~/.claude` or `~/.cursor` changed during a packaging check | Ran `npx skills add .` without `--list` | Discovery is `npx skills add . --list` only. Keep `npx` out of `make verify` |
 
 <!-- last-verified: 2026-09 -->

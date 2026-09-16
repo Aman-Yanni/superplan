@@ -21,6 +21,7 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 - [❗ The problem](#-the-problem)
 - [🛠️ The fix (target)](#️-the-fix-target)
 - [📊 Status](#-status)
+- [📦 Install](#-install)
 - [📂 Repo layout](#-repo-layout)
 - [📚 Dependencies & docs](#-dependencies--docs)
 - [🔁 Building with Turboplan](#-building-with-turboplan)
@@ -68,9 +69,51 @@ While Superplan itself is being built, prefer **symlink** from this git repo so 
 | ---- | ----- |
 | 🧭 Agent rules (`.cursor/rules/`) | Bootstrapped |
 | 📋 MVP plan (`planning/phases/`) | Seeded — see INDEX |
-| 🛠️ Product code (`skills/`, `install.sh`) | T03: nine pack skills; `./install.sh` symlink/copy into a (fake) HOME. Live install is T08 |
+| 🛠️ Product code (`skills/`, `install.sh`) | T04: nine pack skills; `./install.sh` and `npx skills add . --list`. Live `-g` install is T08 |
 | 🧰 Verify | `make verify` (shellcheck + tests + pack-check) passes |
 | 📦 Toolchain | Node v22.18.0 (npx skills consumer only); shellcheck 0.11.0; lefthook 2.1.14 |
+
+## 📦 Install
+
+Two paths. Prefer **`./install.sh`** while working in this git repo (no Node, symlink, edits are live).
+
+### Local (no Node)
+
+```bash
+./install.sh              # interactive agent select
+./install.sh all          # Claude Code + Cursor, symlink
+./install.sh --copy cursor
+```
+
+Destinations: `$HOME/.claude/skills/<name>` and `$HOME/.cursor/skills/<name>`.
+
+Dry-run without touching your real home:
+
+```bash
+HOME="$(mktemp -d)" ./install.sh all
+```
+
+### skills CLI (Node)
+
+Discover the pack **without installing**:
+
+```bash
+npx skills add . --list
+```
+
+That must print all nine skills (`grill-me`, `setup-tasks`, `task-1-plan`, `task-2-execute`, `task-3-complete`, `dialectic-of-cognition`, `audit-rules`, `bootstrap-turboplan`, `superplan-init`).
+
+When you are ready to install globally (later; writes into your real home):
+
+```bash
+npx skills add . -g -a claude-code -a cursor
+test -f ~/.claude/skills/grill-me/SKILL.md
+test -f ~/.cursor/skills/grill-me/SKILL.md
+```
+
+Always pass **`-a claude-code -a cursor`**. After a global add, confirm **`~/.cursor/skills/<name>/SKILL.md`** exists. The CLI has historically written `~/.agents/skills` and skipped Cursor's personal dir. If `~/.cursor/skills/grill-me/SKILL.md` is missing, run `./install.sh cursor` (or reinstall with `-a cursor -g`) and check again. Never install into `~/.cursor/skills-cursor`.
+
+There is no GitHub remote yet, so `npx skills add owner/superplan` will not work. Do not publish this pack to the skills.sh registry unless asked.
 
 ## 📂 Repo layout
 

@@ -94,3 +94,11 @@ Also: https://lefthook.dev/
 | `mkdir: …/.cursor: Operation not permitted` in installer tests; claude dests already passed | Cursor sandbox treats `.cursor` as protected even under a temp `HOME` | Re-run `make verify` outside the sandbox. Product dest is still `"$HOME/.cursor/skills"` |
 
 <!-- last-verified: 2026-09 -->
+
+### `grep treats the needle as flags`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `grep: unrecognized option '--list'` (or `-g`) in tests | Pattern starts with `-` and was passed without `--` | `grep -F -- "$needle" file` |
+
+<!-- last-verified: 2026-09 -->
