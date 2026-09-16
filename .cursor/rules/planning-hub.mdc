@@ -74,7 +74,7 @@ Also: ColonyX `CLAUDE.md` (repo-rules-first, additionalDirectories).
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub | Resolve hub from `~/.superplan/config.yml` + `superplan.yml`; refuse to write hub files into a bound product repo |
+| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub | Until config resolution exists, abort if cwd lacks `phases/INDEX.md`. After that, resolve the hub from `~/.superplan/config.yml` + `superplan.yml` and refuse to write hub files into a bound product repo. |
 
 <!-- last-verified: 2026-09 -->
 

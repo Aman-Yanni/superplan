@@ -101,7 +101,13 @@ fi
 
 good="$(newtmp)"
 mkdir "$good/foo"
-printf '# stub\n' >"$good/foo/SKILL.md"
+cat >"$good/foo/SKILL.md" <<'EOF'
+---
+name: foo
+description: test fixture
+---
+# foo
+EOF
 run_cmd "$PACK" "$good"
 if [[ "$run_code" -eq 0 ]]; then
 	ok "pack-check with SKILL.md"
@@ -109,11 +115,45 @@ else
 	not_ok "pack-check with SKILL.md (code=$run_code err=$run_err)"
 fi
 
+mismatch="$(newtmp)"
+mkdir "$mismatch/foo"
+cat >"$mismatch/foo/SKILL.md" <<'EOF'
+---
+name: bar
+description: mismatch
+---
+# bar
+EOF
+run_cmd "$PACK" "$mismatch"
+if [[ "$run_code" -ne 0 ]]; then
+	ok "pack-check name mismatch fails"
+else
+	not_ok "pack-check name mismatch unexpectedly passed"
+fi
+
+noname="$(newtmp)"
+mkdir "$noname/foo"
+printf '# stub\n' >"$noname/foo/SKILL.md"
+run_cmd "$PACK" "$noname"
+if [[ "$run_code" -ne 0 ]]; then
+	ok "pack-check missing name: fails"
+else
+	not_ok "pack-check missing name: unexpectedly passed"
+fi
+
 run_cmd "$PACK"
-if [[ "$run_code" -eq 0 ]]; then
+if [[ "$run_code" -eq 0 && "$run_out" == *"9 skill(s)"* ]]; then
 	ok "pack-check repo skills/"
 else
-	not_ok "pack-check repo skills/ (code=$run_code err=$run_err)"
+	not_ok "pack-check repo skills/ (code=$run_code out=$run_out err=$run_err)"
+fi
+
+got="$(find "$ROOT/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | paste -sd' ' -)"
+exp_sorted="audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks superplan-init task-1-plan task-2-execute task-3-complete"
+if [[ "$got" == "$exp_sorted" ]]; then
+	ok "repo has exactly 9 pack skill dirs"
+else
+	not_ok "repo pack dirs mismatch (got=$got)"
 fi
 
 if [[ "$fails" -ne 0 ]]; then

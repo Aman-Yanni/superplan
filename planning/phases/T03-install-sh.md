@@ -98,4 +98,6 @@ Implement `install.sh` in the humanize style: pick agents (claude, cursor, all, 
 
 ## Reality notes
 
-*(Amended by upstream `/task-3-complete` if prior tasks changed assumptions)*
+T01 left `install.sh` help-only (exit 2 otherwise). `tests/run.sh` still asserts exit 2 for no-args/`all` and that `HOME=$fake ./install.sh all` does not create `.claude`/`.cursor`. T03 must replace those cases.
+
+T02 landed nine pack skills. Installer dests are `…/skills/<name>` → repo `skills/<name>` for those nine dirs (files like `.gitkeep` are not skills).

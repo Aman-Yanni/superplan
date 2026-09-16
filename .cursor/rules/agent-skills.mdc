@@ -23,8 +23,9 @@ What this spoke does **not** cover (route elsewhere):
 ## Invariants
 
 1. Each published skill is `skills/<name>/SKILL.md`. `name` in frontmatter
-   matches the directory. No root `SKILL.md` (that stops `npx skills` from
-   walking the pack unless `--full-depth`).
+   matches the directory (pack-check reads `name:` only between the first two
+   `---` lines). No root `SKILL.md` (that stops `npx skills` from walking the
+   pack unless `--full-depth`).
 2. Portable frontmatter (required by the spec): `name`, `description`. Optional
    spec fields: `license`, `compatibility`, `metadata`, `allowed-tools`.
 3. Superplan work-loop skills are **manual only**: set
@@ -61,6 +62,14 @@ Also: https://agentskills.io
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| Agent cannot find `/grill-me` or install name mismatches | `name:` does not match parent directory | Rename folder or `name:` so they match; lowercase + hyphens only |
+| Agent cannot find `/grill-me` or install name mismatches | `name:` does not match parent directory, or `name:` lives only in the markdown body | `name:` must equal the folder. Pack-check reads it only from YAML between the first two `---` lines; missing `name:` fails. Do not count a body heading as the skill name. |
+
+<!-- last-verified: 2026-09 -->
+
+### `Validator and fixtures must land together`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Existing pack-check tests fail as soon as a new rule ships | Fixtures still match the old weaker check | Update fixtures and assertions in the same change as the validator |
 
 <!-- last-verified: 2026-09 -->

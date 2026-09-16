@@ -93,4 +93,4 @@ Teach every published work-loop skill to resolve the planning hub from saved con
 
 ## Reality notes
 
-*(Amended by upstream `/task-3-complete` if prior tasks changed assumptions)*
+T02 pack skills still treat cwd as the hub. Write-path skills abort if cwd has no `phases/INDEX.md`. T07 must replace that guard with config-based hub resolution (`~/.superplan/config.yml` + hub `superplan.yml`) so a product-repo cwd cannot receive `phases/` or `rules/`.

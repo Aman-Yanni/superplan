@@ -96,4 +96,4 @@ Implement `/superplan-init` in the published pack: ask for the **planning worksp
 
 ## Reality notes
 
-*(Amended by upstream `/task-3-complete` if prior tasks changed assumptions)*
+T02 shipped `skills/superplan-init/SKILL.md` as a stub that explains the three-step sequence and says T05 implements it. Replace that stub; do not keep the “stop after explaining T05” body.

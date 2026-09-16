@@ -68,7 +68,7 @@ While Superplan itself is being built, prefer **symlink** from this git repo so 
 | ---- | ----- |
 | 🧭 Agent rules (`.cursor/rules/`) | Bootstrapped |
 | 📋 MVP plan (`planning/phases/`) | Seeded — see INDEX |
-| 🛠️ Product code (`skills/`, `install.sh`) | T01 skeleton: help-only `install.sh`, empty `skills/`, `make verify` green |
+| 🛠️ Product code (`skills/`, `install.sh`) | T02: nine pack skills under `skills/`; `install.sh` still help-only |
 | 🧰 Verify | `make verify` (shellcheck + tests + pack-check) passes |
 | 📦 Toolchain | Node v22.18.0 (npx skills consumer only); shellcheck 0.11.0; lefthook 2.1.14 |
 

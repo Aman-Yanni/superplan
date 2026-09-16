@@ -8,7 +8,7 @@
 | ID | Title | Status | Depends-on | Next | Layer | Notes |
 | -- | ----- | ------ | ---------- | ---- | ----- | ----- |
 | T01 | [Repo skeleton](./T01-repo-skeleton.md) | ✅ | — | T02 | L0 | `make verify` first green |
-| T02 | [Canonical skill pack](./T02-canonical-skill-pack.md) | Pending | T01 | T03 | L1 | ColonyX port, generalized |
+| T02 | [Canonical skill pack](./T02-canonical-skill-pack.md) | ✅ | T01 | T03 | L1 | ColonyX port, generalized |
 | T03 | [install.sh](./T03-install-sh.md) | Pending | T02 | T04 | L2 | Humanize-style; symlink default |
 | T04 | [skills.sh packaging](./T04-skills-cli-packaging.md) | Pending | T03 | T05 | L3 | `npx skills add` compatible |
 | T05 | [/superplan-init](./T05-superplan-init.md) | Pending | T04 | T06 | L4 | Workspace → hub folder → repos |
