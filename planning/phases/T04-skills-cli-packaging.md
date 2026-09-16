@@ -94,4 +94,4 @@ Make the repo something `npx skills add <path-or-owner/repo> -g -a claude-code -
 
 ## Reality notes
 
-*(Amended by upstream `/task-3-complete` if prior tasks changed assumptions)*
+T03 shipped `./install.sh` (symlink default, `--copy`, claude/cursor/all, interactive). Tests use a fake HOME and snapshot the real skill dirs. T04 must not replace `install.sh`; document `npx skills add` as an additional path. Do not create a GitHub remote or publish to the registry. Pack is nine skills under `skills/` with no root `SKILL.md`.

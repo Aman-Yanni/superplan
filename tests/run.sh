@@ -8,6 +8,12 @@ PACK="$ROOT/scripts/pack-check.sh"
 fails=0
 fixtures=()
 
+REAL_HOME="$HOME"
+real_claude="$(ls -A "$REAL_HOME/.claude/skills" 2>/dev/null || true)"
+real_cursor="$(ls -A "$REAL_HOME/.cursor/skills" 2>/dev/null || true)"
+
+PACK_NAMES="audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks superplan-init task-1-plan task-2-execute task-3-complete"
+
 cleanup() {
 	local d
 	if ((${#fixtures[@]} > 0)); then
@@ -45,6 +51,37 @@ run_cmd() {
 	run_err="$(cat "$errf")"
 }
 
+run_cmd_in() {
+	# $1 = stdin string; remaining args = command
+	local outf errf
+	outf="$(newtmp)/out"
+	errf="$(newtmp)/err"
+	run_code=0
+	printf '%s' "$1" | "$2" "${@:3}" >"$outf" 2>"$errf" || run_code=$?
+	run_out="$(cat "$outf")"
+	run_err="$(cat "$errf")"
+}
+
+assert_nine_links() {
+	local dest_root="$1"
+	local label="$2"
+	local n src dest
+	for n in $PACK_NAMES; do
+		dest="$dest_root/$n"
+		src="$ROOT/skills/$n"
+		if [[ -L "$dest" && "$(readlink "$dest")" == "$src" && -f "$dest/SKILL.md" ]]; then
+			continue
+		fi
+		not_ok "$label missing link $n"
+		return
+	done
+	if [[ -e "$dest_root/.gitkeep" ]]; then
+		not_ok "$label installed .gitkeep"
+		return
+	fi
+	ok "$label 9 symlinks"
+}
+
 run_cmd "$INSTALL" --help
 if [[ "$run_code" -eq 0 && "$run_out" == *Usage* ]]; then
 	ok "install.sh --help"
@@ -59,27 +96,89 @@ else
 	not_ok "install.sh -h (code=$run_code)"
 fi
 
-run_cmd "$INSTALL"
-if [[ "$run_code" -eq 2 && "$run_err" == *"not implemented"* ]]; then
-	ok "install.sh no-args exits 2"
+run_cmd_in "" "$INSTALL"
+if [[ "$run_code" -ne 0 && "$run_err" == *"no agent selected"* ]]; then
+	ok "install.sh no-args empty stdin"
 else
 	not_ok "install.sh no-args (code=$run_code err=$run_err)"
 fi
 
-run_cmd "$INSTALL" all
-if [[ "$run_code" -eq 2 && "$run_err" == *"not implemented"* ]]; then
-	ok "install.sh all exits 2"
+run_cmd "$INSTALL" nope
+if [[ "$run_code" -eq 2 ]]; then
+	ok "install.sh unknown arg exits 2"
 else
-	not_ok "install.sh all (code=$run_code err=$run_err)"
+	not_ok "install.sh unknown arg (code=$run_code)"
 fi
 
-fake_home="$(newtmp)"
-HOME="$fake_home" run_cmd "$INSTALL" --help
-HOME="$fake_home" run_cmd "$INSTALL" all
-if [[ ! -e "$fake_home/.claude" && ! -e "$fake_home/.cursor" ]]; then
-	ok "install.sh does not create agent dirs under fake HOME"
+fake_all="$(newtmp)"
+HOME="$fake_all" run_cmd "$INSTALL" all
+if [[ "$run_code" -eq 0 && "$run_out" == *symlink* ]]; then
+	ok "install.sh all exits 0"
 else
-	not_ok "install.sh wrote under fake HOME"
+	not_ok "install.sh all (code=$run_code out=$run_out err=$run_err)"
+fi
+assert_nine_links "$fake_all/.claude/skills" "all claude"
+assert_nine_links "$fake_all/.cursor/skills" "all cursor"
+
+HOME="$fake_all" run_cmd "$INSTALL" all
+if [[ "$run_code" -eq 0 ]]; then
+	ok "install.sh all idempotent"
+else
+	not_ok "install.sh all idempotent (code=$run_code err=$run_err)"
+fi
+
+fake_copy="$(newtmp)"
+HOME="$fake_copy" run_cmd "$INSTALL" --copy cursor
+if [[ "$run_code" -eq 0 && ("$run_out" == *copy* || "$run_out" == *copied*) ]]; then
+	ok "install.sh --copy cursor exits 0"
+else
+	not_ok "install.sh --copy cursor (code=$run_code out=$run_out err=$run_err)"
+fi
+if [[ ! -e "$fake_copy/.claude" ]]; then
+	ok "--copy cursor does not create claude dest"
+else
+	not_ok "--copy cursor created claude dest"
+fi
+if [[ -d "$fake_copy/.cursor/skills/grill-me" && ! -L "$fake_copy/.cursor/skills/grill-me" && -f "$fake_copy/.cursor/skills/grill-me/SKILL.md" && "$(cat "$fake_copy/.cursor/skills/grill-me/.superplan-install")" == "$ROOT/skills/grill-me" ]]; then
+	ok "--copy cursor grill-me is a marked copy"
+else
+	not_ok "--copy cursor grill-me not a marked copy"
+fi
+
+fake_foreign="$(newtmp)"
+mkdir -p "$fake_foreign/.claude/skills/grill-me"
+printf 'nope\n' >"$fake_foreign/.claude/skills/grill-me/FOREIGN"
+HOME="$fake_foreign" run_cmd "$INSTALL" claude
+if [[ "$run_code" -eq 1 && "$run_err" == *refusing* ]]; then
+	ok "install.sh refuses foreign dest"
+else
+	not_ok "install.sh foreign (code=$run_code err=$run_err)"
+fi
+if [[ -f "$fake_foreign/.claude/skills/grill-me/FOREIGN" && "$(ls -A "$fake_foreign/.claude/skills")" == "grill-me" ]]; then
+	ok "foreign dest left intact, no siblings"
+else
+	not_ok "foreign dest mutated"
+fi
+
+fake_int="$(newtmp)"
+HOME="$fake_int" run_cmd_in $'3\n' "$INSTALL"
+if [[ "$run_code" -eq 0 ]]; then
+	ok "install.sh interactive 3 exits 0"
+else
+	not_ok "install.sh interactive 3 (code=$run_code err=$run_err)"
+fi
+assert_nine_links "$fake_int/.claude/skills" "interactive claude"
+assert_nine_links "$fake_int/.cursor/skills" "interactive cursor"
+
+if [[ "$(ls -A "$REAL_HOME/.claude/skills" 2>/dev/null || true)" == "$real_claude" ]]; then
+	ok "real ~/.claude/skills unchanged"
+else
+	not_ok "real ~/.claude/skills changed"
+fi
+if [[ "$(ls -A "$REAL_HOME/.cursor/skills" 2>/dev/null || true)" == "$real_cursor" ]]; then
+	ok "real ~/.cursor/skills unchanged"
+else
+	not_ok "real ~/.cursor/skills changed"
 fi
 
 empty="$(newtmp)"

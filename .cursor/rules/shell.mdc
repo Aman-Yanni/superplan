@@ -86,3 +86,11 @@ Also: https://lefthook.dev/
 | `skills/` missing after clone / first commit | Git does not store empty directories | Keep a non-skill placeholder file in the pack dir; pack-check ignores files and only requires `SKILL.md` inside subdirectories |
 
 <!-- last-verified: 2026-09 -->
+
+### `Sandbox blocks fake HOME .cursor`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| `mkdir: …/.cursor: Operation not permitted` in installer tests; claude dests already passed | Cursor sandbox treats `.cursor` as protected even under a temp `HOME` | Re-run `make verify` outside the sandbox. Product dest is still `"$HOME/.cursor/skills"` |
+
+<!-- last-verified: 2026-09 -->

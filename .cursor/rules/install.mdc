@@ -23,11 +23,16 @@ What this spoke does **not** cover (route elsewhere):
 
 1. Default is **symlink** from this repo's `skills/<name>` into each selected
    agent's global skills dir, so `git pull` updates are live while authoring.
-2. Supported install targets at minimum: `claude` → `~/.claude/skills`,
-   `cursor` → `~/.cursor/skills`. `all` (or interactive pick) does both.
+   Dest paths must use `"$HOME/.claude/skills"` and `"$HOME/.cursor/skills"`,
+   never `~` (tilde ignores a faked `HOME`).
+2. Supported install targets at minimum: `claude` → `$HOME/.claude/skills`,
+   `cursor` → `$HOME/.cursor/skills`. `all` (or interactive pick) does both.
    Interactive walkthrough is the no-args path (like humanize, plus Cursor).
 3. `--copy` copies instead of linking. Say so in the output. Do not `rm -rf`
-   a destination that is not a Superplan skill without asking.
+   a destination that is not a Superplan skill without asking. A dest is ours
+   if it is a symlink to this pack's `skills/<name>`, or a directory whose
+   `.superplan-install` first line is that absolute source path. Preflight
+   every dest before applying any.
 4. `./install.sh` must work with **no Node**. `npx skills` is the later
    distribution path, not a requirement for local install.
 5. Tests run against a fake `HOME`, never the developer's real skill dirs,
@@ -58,6 +63,14 @@ https://code.claude.com/docs/en/skills
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| Unrelated skill directory gone after install | `rm -rf` on a dest name collision | Only replace dest if it is a Superplan symlink or a previous Superplan copy; otherwise stop and ask |
+| Unrelated skill directory gone after install | `rm -rf` on a dest name collision | Only replace dest if it is a Superplan symlink (readlink equals pack `skills/<name>`) or a previous Superplan copy (`.superplan-install` marker). Preflight all dests; otherwise stop and ask |
+
+<!-- last-verified: 2026-09 -->
+
+### `Tilde ignores fake HOME`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| Tests install into the real home, or a faked `HOME` stays empty | Script used `~/.claude` / `~/.cursor` (passwd home), not `$HOME` | Use `"$HOME/.claude/skills"` and `"$HOME/.cursor/skills"` everywhere |
 
 <!-- last-verified: 2026-09 -->
