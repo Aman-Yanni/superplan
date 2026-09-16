@@ -24,8 +24,9 @@ Operational harness for **Rule Maintenance** in the hub `CLAUDE.md` and/or
 
 Scope: $ARGUMENTS
 
-If `phases/INDEX.md` is missing in the current directory, **stop and ask**
-where the planning hub is. Do not write `rules/` into a product repo.
+Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
+as the hub. If the hub cannot be resolved, **stop and ask**. Do not write
+`rules/` into a product repo.
 
 ## Mode A — Debugging learnings
 

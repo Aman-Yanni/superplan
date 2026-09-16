@@ -43,8 +43,9 @@ What this spoke does **not** cover (route elsewhere):
 6. **Close-out never merges** unless that hub's config (or the invocation)
    opts in. Default: open PRs, stop. Do not create remotes unless the user
    asks.
-7. Global skills must **resolve the hub from config**, not from cwd. Writing
-   `phases/` into a product repo is a bug.
+7. Global skills must **resolve the hub from config**, not from cwd. Read
+   `"$HOME/.superplan/config.yml"` (`planning_workspace` and `hub`) and
+   `<hub>/superplan.yml`. Writing `phases/` into a product repo is a bug.
 
 ## Init sequence (product)
 
@@ -79,7 +80,7 @@ Also: ColonyX `CLAUDE.md` (repo-rules-first, additionalDirectories).
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub | Until config resolution exists, abort if cwd lacks `phases/INDEX.md`. After that, resolve the hub from `~/.superplan/config.yml` + `superplan.yml` and refuse to write hub files into a bound product repo. |
+| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub | Read `"$HOME/.superplan/config.yml"` (`hub:`) and `<hub>/superplan.yml`. Follow `references/hub-resolution.md`. Refuse to write hub files into a bound product repo. |
 
 <!-- last-verified: 2026-09 -->
 

@@ -96,4 +96,4 @@ Prove the whole loop on a **dummy** project (not ColonyX): live-install the pack
 
 ## Reality notes
 
-*(Amended by upstream `/task-3-complete` if prior tasks changed assumptions)*
+T07 pack skills resolve the hub from `$HOME/.superplan/config.yml` (`planning_workspace` + `hub`) and `<hub>/superplan.yml`. Do **not** start T08 until the human explicitly okays a live install into real `~/.claude/skills` and `~/.cursor/skills`. First bind is a **dummy** project, not ColonyX. Use a fake HOME dry-run if they want to wait.

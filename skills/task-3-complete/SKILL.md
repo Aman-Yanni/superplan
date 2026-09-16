@@ -25,8 +25,9 @@ Arguments: $ARGUMENTS
 - Task id — default: the INDEX `InProgress` row, else the task executed in this conversation.
 - `--no-push` — commit locally only: no push, no PR, no PR reviews.
 
-If `phases/INDEX.md` is missing in the current directory, **stop and ask**
-where the planning hub is. Do not write hub files into a product repo.
+Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
+as the hub. If the hub cannot be resolved, **stop and ask**. Do not write hub
+files into a product repo.
 
 ## Hard constraints
 
@@ -39,7 +40,8 @@ where the planning hub is. Do not write hub files into a product repo.
    name and review `git status` before committing — no secrets.
 5. Never force-push, skip hooks, amend published commits or edit git config. If
    a hook fails, fix the cause and make a new commit.
-6. **Never merge** unless the human opts in. Do not invent a GitHub remote.
+6. **Never merge** unless hub `superplan.yml` has `merge_prs: true` or the
+   human opts in. Do not invent a GitHub remote.
 7. Always end with a Manual test section, or `Nothing to test — <why>`.
 
 ## Procedure

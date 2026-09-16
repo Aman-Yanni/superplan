@@ -19,8 +19,9 @@ implement it cold, without rediscovering the design. You do not implement.
 
 Task: $ARGUMENTS
 
-If `phases/INDEX.md` is missing in the current directory, **stop and ask**
-where the planning hub is. Do not write hub files into a product repo.
+Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
+as the hub. If the hub cannot be resolved, **stop and ask**. Do not write hub
+files into a product repo.
 
 If no task is given, read `phases/INDEX.md` and pick the first `Pending` or
 `Planned` row whose Depends-on are all `✅` or `—`.

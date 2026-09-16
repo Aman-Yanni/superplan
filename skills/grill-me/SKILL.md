@@ -24,8 +24,9 @@ summarise.
 
 Idea: $ARGUMENTS
 
-If `phases/INDEX.md` is missing in the current directory, say so and ask where
-the planning hub is. Do not invent a hub. Do not write into a product repo.
+Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
+as the hub. If the hub cannot be resolved, stop and ask. Do not invent a hub
+or write into a product repo.
 
 ## 1. Read before grilling
 

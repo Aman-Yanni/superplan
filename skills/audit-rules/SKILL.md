@@ -18,8 +18,8 @@ Read-only. Flag findings; never fix or remove anything.
 
 Scope: $ARGUMENTS
 
-If `phases/INDEX.md` is missing in the current directory, say so and ask where
-the planning hub is. Do not invent a hub.
+Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
+as the hub. If the hub cannot be resolved, say so and ask. Do not invent a hub.
 
 ## Constraints
 
