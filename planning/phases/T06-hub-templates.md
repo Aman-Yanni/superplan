@@ -24,7 +24,7 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 - [x] Templates live in this repo under `templates/hub/`
 - [x] Generated hub has no `.claude/skills/` or `.cursor/skills/` pack copies
 - [x] Repos table + verify-gates section are filled from what init discovered (or “none established”)
-- [x] Repo-rules-first wording matches ColonyX hub `CLAUDE.md` (generalized)
+- [x] Repo-rules-first wording matches a generalized hub `CLAUDE.md`
 - [x] Refreshing an existing hub does not wipe user `rules/` entries
 
 ## Implementation Plan
@@ -33,7 +33,7 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 
 ### High-level notes (bootstrap)
 
-- Shape: `/Users/aman/projects/Claude Plans/ColonyX/CLAUDE.md` and `templates/`
+- Shape: `<existing-product-hub>/CLAUDE.md` and `templates/`
 - Cursor has no `additionalDirectories`; document adding product repos to the workspace / using absolute paths
 - Spoke: `planning-hub.mdc`, `claude-code.mdc`
 
@@ -45,7 +45,7 @@ Add data-only hub templates and have `/superplan-init` write them: `CLAUDE.md` /
 
 ### Context for executor
 
-Add `templates/hub/` (generalized ColonyX hub, no skill copies). Extend `init.sh` to write them. Refresh must not delete existing `rules/*.md`. Gates default to “none established”. Cursor note in `CURSOR.md`.
+Add `templates/hub/` (generalized data-only hub, no skill copies). Extend `init.sh` to write them. Refresh must not delete existing `rules/*.md`. Gates default to “none established”. Cursor note in `CURSOR.md`.
 
 ### Steps
 
@@ -55,7 +55,7 @@ Add `templates/hub/` (generalized ColonyX hub, no skill copies). Extend `init.sh
 
 ### Out of scope
 
-T07 hub resolution. T08 live install. ColonyX bind.
+T07 hub resolution. T08 live install. bind an existing product hub.
 
 ### Execute model recommendation
 

@@ -36,8 +36,8 @@ You do **not** implement product code unless the user explicitly asks.
    smaller execute model (see hub “Model split”). Vague plans are not done.
 5. Prefer `make verify` (shellcheck + `tests/run.sh` + pack-check). Plans must
    include lint + tests. New shell gets tests against a **fake HOME**.
-6. Study references listed in the stub (ColonyX, humanize `install.sh`, skills
-   CLI). Reimplement — do not vendor those trees into this repo.
+6. Study references listed in the stub (humanize `install.sh`, skills
+   CLI, official agent-skill docs). Reimplement — do not vendor those trees into this repo.
 7. Two skill trees: `.cursor/skills/` is Superplan's build loop; `skills/` is
    the published pack. Do not silently switch to Go, Node, or Python.
 8. Do not plan writes into the developer's real `~/.claude/skills` or

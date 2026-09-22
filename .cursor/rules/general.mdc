@@ -122,7 +122,6 @@ Node is not a Superplan runtime. It is only the consumer toolchain for
 
 ### Inspiration sources
 
-- ColonyX Claude port: `/Users/aman/projects/Claude Plans/ColonyX`
 - Original methodology: https://github.com/commoddity/turboplan
 - Installer shape: https://github.com/harshaneel/humanize/blob/main/install.sh
 

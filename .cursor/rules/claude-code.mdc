@@ -30,7 +30,7 @@ What this spoke does **not** cover (route elsewhere):
 3. Hub folders are **data-only**: no copies of Superplan skills under the hub's
    `.claude/skills/`.
 4. Work-loop skills stay `disable-model-invocation: true`. Pin `model` /
-   `effort` to match ColonyX: Opus/high for grill, setup, plan, bootstrap,
+   `effort`: Opus/high for grill, setup, plan, bootstrap,
    dialectic; Sonnet/medium for execute, complete, audit.
 5. Never edit a **product repo's** `CLAUDE.md` or `.claude/` without approval.
    Hub files are Superplan's to write during init.

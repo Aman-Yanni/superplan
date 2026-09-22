@@ -27,12 +27,12 @@ Do not write `phases/` or `rules/` into cwd.
 
 ## Hard constraints
 
-1. Ask the **planning workspace** path first. Example:
-   `/Users/aman/projects/Claude Plans`. Do not guess ColonyX.
+1. Ask the **planning workspace** path first. Example: `$HOME/plans`.
+   Do not guess a hub folder name.
 2. Persist that path in `$HOME/.superplan/config.yml` (`planning_workspace`).
    Use `"$HOME"`, never `~`, when invoking the helper.
 3. Reuse an existing folder under the workspace before creating one. Suggest a
-   dummy name; do not default to `ColonyX`.
+   name; do not default to an existing product’s folder.
 4. Product repos are selected by the human (discover + pick, or explicit paths).
 5. `merge_prs: false` always in this task. Do not merge. Do not `git remote add`.
 6. Do not run `install.sh` or `npx skills add`. Do not write into
@@ -40,8 +40,8 @@ Do not write `phases/` or `rules/` into cwd.
 7. Write data-only hub files from `templates/hub/` (`CLAUDE.md`, `AGENTS.md`,
    `phases/INDEX.md` if missing, `rules/` stubs if missing). Do not copy
    Superplan skills into the hub. Do not wipe existing `rules/*.md`.
-8. Tests and live dummy work use temp / dummy folders — do not bind the real
-   ColonyX repos unless the human names that folder.
+8. Tests and live dummy work use temp / dummy folders — do not bind someone
+   else’s product repos unless the human names that folder.
 
 ## Procedure
 
@@ -90,5 +90,5 @@ kept.
 
 - Treat cwd as the hub or write `phases/` into a product repo.
 - Copy Superplan skills into the hub.
-- Live-install the pack (T08).
-- Default the hub name to ColonyX.
+- Live-install the pack unless the human asked.
+- Default the hub name to an existing product folder.

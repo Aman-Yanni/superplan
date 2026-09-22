@@ -48,7 +48,7 @@ the user before heavy work if they are still on a [small] model.
    - `lefthook.yml` with **pre-commit → make verify**
    If any are missing: **stop**, Status `Blocked` — do **not** treat a single
    script run as "lint+test green."
-6. Never vendor ColonyX, humanize, or turboplan trees. Never write into a
+6. Never vendor humanize or turboplan trees. Never write into a
    bound product repo. Never install into the real `$HOME` skill dirs unless
    the task's AC says live-install and the human asked.
 7. Do not commit unless the user explicitly asked (task-3-complete commits).

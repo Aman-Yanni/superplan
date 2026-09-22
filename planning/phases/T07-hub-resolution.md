@@ -33,7 +33,7 @@ Teach every published work-loop skill to resolve the planning hub from saved con
 
 ### High-level notes (bootstrap)
 
-- ColonyX skills assumed the hub **was** cwd. That is the bug this task removes.
+- Hub-local skills assumed the hub **was** cwd. That is the bug this task removes.
 - Spoke: `.cursor/rules/planning-hub.mdc`
 
 ## Execution plan (filled by /task-1-plan)

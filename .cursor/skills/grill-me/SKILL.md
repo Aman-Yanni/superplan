@@ -31,9 +31,9 @@ Before the first question:
 - Read `planning/phases/INDEX.md` to know what exists and what's done
 - Read any feature-plan / spec documents the human attached or referenced
 - Grep the codebase for the surfaces the idea touches
-- If the idea is about the **published pack**, look at `skills/` (or ColonyX
-  `.claude/skills/` as reference). If it is about **building Superplan**, look
-  at `.cursor/skills/` and `install.sh`. Do not mix the two trees.
+- If the idea is about the **published pack**, look at `skills/`. If it is
+  about **building Superplan**, look at `.cursor/skills/` and `install.sh`.
+  Do not mix the two trees.
 
 ### 2. Interview in rounds over a design tree
 

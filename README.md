@@ -11,8 +11,7 @@
 
 ## Summary
 
-Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is the
-turboplan(https://github.com/commoddity/turboplan) port, generalized: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a dummy project without copying skills into that hub.
+Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is a [Turboplan](https://github.com/commoddity/turboplan) port: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a project without copying skills into that hub.
 
 Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agent rules + phased delivery).
 
@@ -42,7 +41,7 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 ## 🛠️ The fix (target)
 
 - **One pack**, installed globally for **Claude Code, Cursor, and OpenCode**.
-- **Planning workspace first** (e.g. `/Users/aman/projects/Claude Plans`), then a per-project hub folder (create a name you choose).
+- **Planning workspace first** (e.g. `$HOME/plans`), then a per-project hub folder (create a name you choose).
 - **Select product repos** by searching the current folder or a work-folder path you give.
 - Hubs are **data-only**: `CLAUDE.md` / `AGENTS.md`, `rules/`, `phases/`. Skills stay global.
 - **Repo rules win.** Hub spokes add routing and cross-repo notes; they do not replace a repo's own docs. Conflicts are reported and asked about.
@@ -71,7 +70,7 @@ While Superplan itself is being built, prefer **symlink** from this git repo so 
 | ---- | ----- |
 | 🧭 Agent rules (`.cursor/rules/`) | Bootstrapped |
 | 📋 MVP plan (`planning/phases/`) | Seeded — see INDEX |
-| 🛠️ Product code (`skills/`, `install.sh`) | T08: globally installed via `./install.sh all` (symlink). Dummy hub `DummySuperplan`. No GitHub remote; `npx -g` not used |
+| 🛠️ Product code (`skills/`, `install.sh`) | T08 complete: installer, init, and hub templates. Private GitHub remote; skills.sh registry not used |
 | 🧰 Verify | `make verify` (shellcheck + tests + pack-check) passes |
 | 📦 Toolchain | Node v22.18.0 (npx skills consumer only); shellcheck 0.11.0; lefthook 2.1.14 |
 
@@ -117,11 +116,11 @@ test -f ~/.config/opencode/skills/grill-me/SKILL.md
 
 Always pass **`-a claude-code -a cursor`**. For OpenCode/DeepSeek, pass **`-a opencode`** as well, then confirm **`~/.config/opencode/skills/<name>/SKILL.md`**. Prefer `./install.sh opencode` for that native dest. After a global add, confirm **`~/.cursor/skills/<name>/SKILL.md`** exists. The CLI has historically written `~/.agents/skills` and skipped Cursor's personal dir. If `~/.cursor/skills/grill-me/SKILL.md` is missing, run `./install.sh cursor` (or reinstall with `-a cursor -g`) and check again. Never install into `~/.cursor/skills-cursor`.
 
-There is no GitHub remote yet, so `npx skills add owner/superplan` will not work. Do not publish this pack to the skills.sh registry unless asked.
+`npx skills add <owner>/superplan` works only if the clone’s GitHub remote is reachable for that user. Do not publish this pack to the skills.sh registry unless asked.
 
 ### Uninstall
 
-Remove only Superplan dests that are symlinks into this repo. Keep `humanize` and any other skills.
+Remove only Superplan dests that are symlinks into this repo. Keep any unrelated skills already in those directories.
 
 ```bash
 # from the Superplan clone
@@ -130,7 +129,7 @@ for n in audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-t
 done
 ```
 
-Dummy hub (T08): `rm -rf "/Users/aman/projects/Claude Plans/DummySuperplan"`. Optional dummy repo: `/Users/aman/projects/other/dummy-superplan`. Config: `~/.superplan/config.yml`.
+If you created a dummy hub, delete that folder under your planning workspace. Config: `~/.superplan/config.yml`.
 
 ## 📂 Repo layout
 
@@ -155,7 +154,7 @@ Human-facing summary. Agents get detail in matching `.cursor/rules/*.mdc` spokes
 | Claude Code | Personal skills + `additionalDirectories` | [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) | [`.cursor/rules/claude-code.mdc`](.cursor/rules/claude-code.mdc) |
 | Cursor Skills | Personal `~/.cursor/skills` | [cursor.com/docs/skills](https://cursor.com/docs/skills) | [`.cursor/rules/cursor-skills.mdc`](.cursor/rules/cursor-skills.mdc) |
 | OpenCode | Personal `~/.config/opencode/skills` (DeepSeek and other models) | [opencode.ai/docs/skills](https://opencode.ai/docs/skills/) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
-| Planning hub | Workspace, data-only hubs, repo-rules-first `README.md` / `CLAUDE.md` | [`.cursor/rules/planning-hub.mdc`](.cursor/rules/planning-hub.mdc) |
+| Planning hub | Workspace, data-only hubs, repo-rules-first | [Turboplan](https://github.com/commoddity/turboplan) | [`.cursor/rules/planning-hub.mdc`](.cursor/rules/planning-hub.mdc) |
 | install.sh | Agent-select symlink installer | [humanize install.sh](https://github.com/harshaneel/humanize/blob/main/install.sh) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
 | shellcheck / lefthook | Lint + pre-commit verify | [shellcheck wiki](https://www.shellcheck.net/wiki/) · [lefthook](https://lefthook.dev/) | [`.cursor/rules/shell.mdc`](.cursor/rules/shell.mdc) |
 
@@ -172,9 +171,7 @@ Work proceeds one phase task at a time. Full methodology:
   ✅ /task-3-complete TXX → commit + push if origin exists + Manual test
 ```
 
-See [`planning/phases/INDEX.md`](planning/phases/INDEX.md).
-
-First action after reviewing this bootstrap: `/task-1-plan T01`.
+See [`planning/phases/INDEX.md`](planning/phases/INDEX.md). T01–T08 are complete. New work starts with `/grill-me` or `/setup-tasks`.
 
 ## 🔒 Security / invariants
 

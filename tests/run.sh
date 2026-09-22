@@ -259,7 +259,7 @@ else
 fi
 
 fake_init_home="$(newtmp)"
-ws="$(newtmp)/Claude Plans"
+ws="$(newtmp)/My Plans"
 repo1="$(newtmp)/app"
 mkdir -p "$repo1/.git"
 HOME="$fake_init_home" run_cmd "$INIT" --workspace "$ws" --create-workspace --hub Dummy --repo "$repo1"

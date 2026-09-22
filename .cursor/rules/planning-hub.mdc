@@ -26,7 +26,7 @@ What this spoke does **not** cover (route elsewhere):
    `rules/`, `phases/`, `templates/`, and a small config (`superplan.yml`).
    It does not copy Superplan skills.
 2. **Planning workspace first.** Init asks for the workspace path (example:
-   `/Users/aman/projects/Claude Plans`) and saves it as the default. Then it
+   `$HOME/plans`) and saves it as the default. Then it
    deals with the project folder inside that workspace.
 3. **Reuse before create.** If `<workspace>/<name>/` already exists, reuse it.
    If it does not, suggest a folder name, or let the user name it, or accept a
@@ -66,13 +66,13 @@ symlink install can still run it). It must use `"$HOME/.superplan"`, not `~`.
 
 ## Docs (if stuck):
 
-**Docs (if stuck):** `/Users/aman/projects/Claude Plans/ColonyX/README.md`
+**Docs (if stuck):** https://github.com/commoddity/turboplan
 
-- ColonyX is the Claude-side port this product generalizes (skills-in-hub →
-  skills-global + data-only hub).
+- Superplan generalizes hub-local turboplan skills into a global pack plus
+  data-only hubs (skills stay out of the hub folder).
 - last consulted: 2026-09
 
-Also: ColonyX `CLAUDE.md` (repo-rules-first, additionalDirectories).
+Also: hub `CLAUDE.md` (repo-rules-first, additionalDirectories).
 
 ## Problem classes
 

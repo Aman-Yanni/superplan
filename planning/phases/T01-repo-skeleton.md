@@ -108,7 +108,7 @@ Makefile already expects exactly these files (`lint: install.sh missing (T01)` e
    - fixture `broken/foo/` (no SKILL.md) → non-zero
    - fixture `ok/foo/SKILL.md` (any content) → 0
    - `pack-check.sh` with no args (repo `skills/`) → 0
-   - Use `mktemp -d` + `trap 'rm -rf …' EXIT` for fixtures. Do not use the developer `$HOME` as a dest. Do not `ls`/`touch` `/Users/aman/.claude/skills` as part of the test (read-only stat of real home is unnecessary)
+   - Use `mktemp -d` + `trap 'rm -rf …' EXIT` for fixtures. Do not use the developer `$HOME` as a dest. Do not `ls`/`touch` `$HOME/.claude/skills` as part of the test (read-only stat of real home is unnecessary)
    → verify: `./tests/run.sh` exits 0
 
 5. `chmod +x install.sh tests/run.sh scripts/pack-check.sh`. → verify: `test -x install.sh tests/run.sh scripts/pack-check.sh`
@@ -145,7 +145,7 @@ make verify
 - `install.sh` with no args must **not** follow humanize (humanize installs to Claude by default). T01 = help or exit 2 only
 - `set -e` + `cmd; echo $?` in tests: run failing commands as `if script; then …; else …; fi` or `script && … || true` carefully so the runner can assert non-zero without aborting
 - Do not `rm -rf` anything under `$HOME`
-- Do not copy ColonyX or humanize files into this repo
+- Do not copy humanize files or another project’s hub into this repo
 - First commit of the repo happens in `/task-3-complete`, not here — do not `git commit`
 
 ### Out of scope

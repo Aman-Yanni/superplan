@@ -48,7 +48,7 @@ Implement `install.sh` in the humanize style: pick agents (claude, cursor, all, 
 
 ### Context for executor
 
-Replace the help-only body of `/Users/aman/projects/other/superplan/install.sh` with a humanize-style installer. Default **symlink** each pack skill dir into the selected agent's global skills dir. `--copy` copies instead. Tests must use a temp `HOME` and must not change the developer's real `~/.claude/skills` or `~/.cursor/skills`.
+Replace the help-only body of `install.sh` with a humanize-style installer. Default **symlink** each pack skill dir into the selected agent's global skills dir. `--copy` copies instead. Tests must use a temp `HOME` and must not change the developer's real `~/.claude/skills` or `~/.cursor/skills`.
 
 Keep the existing `usage()` text (the flag contract). Delete the `install is not implemented yet` path.
 

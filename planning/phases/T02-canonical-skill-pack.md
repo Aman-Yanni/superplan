@@ -8,7 +8,7 @@
 
 ## Description
 
-Author the published pack under `skills/<name>/SKILL.md`: the ColonyX work-loop skills, generalized off ColonyX-specific repos, plus a stub `/superplan-init`. Dual frontmatter (portable spec + Claude `model`/`effort` + Cursor `disable-model-invocation`). No installer wiring yet.
+Author the published pack under `skills/<name>/SKILL.md`: the work-loop skills, generalized off any one product’s repos, plus a stub `/superplan-init`. Dual frontmatter (portable spec + Claude `model`/`effort` + Cursor `disable-model-invocation`). No installer wiring yet.
 
 ## Status History
 
@@ -21,10 +21,10 @@ Author the published pack under `skills/<name>/SKILL.md`: the ColonyX work-loop 
 
 ## Requirements
 
-- [x] Pack skills: `grill-me`, `setup-tasks`, `task-1-plan`, `task-2-execute`, `task-3-complete`, `dialectic-of-cognition`, `audit-rules`, `bootstrap-turboplan` (hub retarget, ColonyX meaning), `superplan-init` (stub that says “T05 implements the UX”)
+- [x] Pack skills: `grill-me`, `setup-tasks`, `task-1-plan`, `task-2-execute`, `task-3-complete`, `dialectic-of-cognition`, `audit-rules`, `bootstrap-turboplan` (hub retarget), `superplan-init` (stub that says “T05 implements the UX”)
 - [x] Each `name:` matches its folder; no root `SKILL.md`
 - [x] Manual-only: `disable-model-invocation: true`
-- [x] Generalized: repo-rules-first, multi-repo, never merge by default — not Django/Remix specifics
+- [x] Generalized: repo-rules-first, multi-repo, never merge by default — not a specific product stack
 - [x] pack-check green for every skill dir
 
 ## Implementation Plan
@@ -33,8 +33,8 @@ Author the published pack under `skills/<name>/SKILL.md`: the ColonyX work-loop 
 
 ### High-level notes (bootstrap)
 
-- Source of behavior: `/Users/aman/projects/Claude Plans/ColonyX/.claude/skills/`
-- Do not copy ColonyX `rules/backend.md` etc. into Superplan
+- Source of behavior: `<existing-product-hub>/.claude/skills/`
+- Do not copy a product hub’s `rules/` into Superplan
 - `.cursor/skills/` stays the Superplan **build** loop; do not replace it with the pack
 - Spec: https://agentskills.io/specification
 - T01: `scripts/pack-check.sh` is live; empty pack is OK; each new `skills/<name>/` needs `SKILL.md`. Keep `skills/.gitkeep`. Do not add a root `SKILL.md`.
@@ -47,13 +47,13 @@ Author the published pack under `skills/<name>/SKILL.md`: the ColonyX work-loop 
 
 ### Context for executor
 
-Goal: write the **published** pack at `skills/<name>/SKILL.md` by rewriting ColonyX's eight work-loop skills (generalized) plus a short `/superplan-init` stub. Extend pack-check so `name:` matches the folder. Do not install globally. Do not change `.cursor/skills/` (that is Superplan's **build** loop).
+Goal: write the **published** pack at `skills/<name>/SKILL.md` by rewriting the eight work-loop skills (generalized) plus a short `/superplan-init` stub. Extend pack-check so `name:` matches the folder. Do not install globally. Do not change `.cursor/skills/` (that is Superplan's **build** loop).
 
-Source (read, do not copy the tree into git): `/Users/aman/projects/Claude Plans/ColonyX/.claude/skills/<name>/SKILL.md`
+Source (read, do not copy the tree into git): `<existing-product-hub>/.claude/skills/<name>/SKILL.md`
 
-Dest: `/Users/aman/projects/other/superplan/skills/<name>/SKILL.md`
+Dest: `skills/<name>/SKILL.md`
 
-| Pack skill | ColonyX source | Notes |
+| Pack skill | source skill | Notes |
 | ---------- | -------------- | ----- |
 | grill-me | …/grill-me/SKILL.md | keep procedure |
 | setup-tasks | …/setup-tasks/SKILL.md | keep procedure |
@@ -62,20 +62,20 @@ Dest: `/Users/aman/projects/other/superplan/skills/<name>/SKILL.md`
 | task-3-complete | …/task-3-complete/SKILL.md | never merge unless human opts in |
 | dialectic-of-cognition | …/dialectic-of-cognition/SKILL.md | store = hub `rules/*.md` |
 | audit-rules | …/audit-rules/SKILL.md | drop hardcoded backend/dashboard/deploy |
-| bootstrap-turboplan | …/bootstrap-turboplan/SKILL.md | **hub retarget** (ColonyX meaning), not Superplan's `.cursor` bootstrap |
+| bootstrap-turboplan | …/bootstrap-turboplan/SKILL.md | **hub retarget**, not Superplan's `.cursor` bootstrap |
 | superplan-init | (new) | stub only; T05 owns the UX |
 
 Invariants: `.cursor/rules/agent-skills.mdc`, `planning-hub.mdc`, `claude-code.mdc`. Keep `skills/.gitkeep`. No repo-root `SKILL.md`.
 
-**These published skills target a planning hub** (like ColonyX: `CLAUDE.md` / `AGENTS.md`, `phases/`, `rules/`). They are **not** Superplan-the-product's `.cursor/rules/general.mdc` loop.
+**These published skills target a planning hub** (like a data-only hub: `CLAUDE.md` / `AGENTS.md`, `phases/`, `rules/`). They are **not** Superplan-the-product's `.cursor/rules/general.mdc` loop.
 
 **Leave cwd-as-hub** (T07 will add `~/.superplan/config.yml`). Add one guard in every skill that writes hub files: if `phases/INDEX.md` is missing in cwd, **stop and ask** — do not write `phases/` or `rules/` into a product repo.
 
-### Shared substitution table (apply to all eight ColonyX ports)
+### Shared substitution table (apply to all eight work-loop ports)
 
-Keep section structure, hard constraints, and procedure. Rewrite only the ColonyX-specific bits:
+Keep section structure, hard constraints, and procedure. Rewrite only the product-specific bits:
 
-| ColonyX | Superplan pack |
+| Source | Superplan pack |
 | ------- | -------------- |
 | Hub file is only `CLAUDE.md` | Hub is `CLAUDE.md` and/or `AGENTS.md` (read whichever exist; if neither, stop and ask) |
 | `phases/INDEX.md`, `phases/TXX-*.md`, `templates/`, `rules/` | keep these hub-relative paths (not `planning/phases/` — that is this Superplan repo) |
@@ -88,10 +88,10 @@ Keep section structure, hard constraints, and procedure. Rewrite only the Colony
 | Dialectic store `rules/*.md` | keep **hub** `rules/*.md` (not Superplan `.cursor/rules/*.mdc`) |
 | bootstrap "Keep all eight" | keep every skill under the **global pack**; hubs stay data-only (no skill copies) |
 | merge | never merge unless the human opts in (no `merge_prs` file yet — T06) |
-| `model` / `effort` / `argument-hint` / `disable-model-invocation: true` | **keep** ColonyX values |
-| `allowed-tools` | **keep** ColonyX lists (Cursor ignores unknown tool names) |
+| `model` / `effort` / `argument-hint` / `disable-model-invocation: true` | **keep** the source values |
+| `allowed-tools` | **keep** the source lists (Cursor ignores unknown tool names) |
 
-Do **not** paste ColonyX Django/Remix/pnpm/`make test.docker` paths (they are not in the skill files anyway). Do **not** vendor the ColonyX directory.
+Do **not** paste product-stack paths (frameworks, package managers, docker test targets) (they are not in the skill files anyway). Do **not** vendor another project’s hub.
 
 Frontmatter required on every pack `SKILL.md`:
 
@@ -101,9 +101,9 @@ name: <folder-name>
 description: >-
   <what + when; third person; include the slash name>
 disable-model-invocation: true
-model: <opus|sonnet as ColonyX>
-effort: <high|medium as ColonyX>
-# argument-hint and allowed-tools: copy from ColonyX when present
+model: <opus|sonnet as in the source skill>
+effort: <high|medium as in the source skill>
+# argument-hint and allowed-tools: copy from the source skill when present
 ---
 ```
 
@@ -129,7 +129,7 @@ effort: <high|medium as ColonyX>
    - Keep fake-HOME installer tests unchanged.
    → verify: `./tests/run.sh` fails until skills exist, then passes after step 5
 
-4. For each of the eight ColonyX skills: read the source end-to-end, write `skills/<name>/SKILL.md` applying the substitution table. Keep headings. Stay under ~500 lines (ColonyX files are 70–122 lines). Insert the `phases/INDEX.md` missing-in-cwd guard in skills that **write** hub files (`setup-tasks`, `task-1-plan`, `task-2-execute`, `task-3-complete`, `dialectic-of-cognition`, `bootstrap-turboplan`). Grill-me and audit-rules only read: if INDEX missing, say so and ask; do not invent a hub. → verify: `test -f skills/<name>/SKILL.md` for all eight; `grep -l 'Django\|Remix\|pnpm\|colonyx-dashboard' skills/*/SKILL.md` is empty
+4. For each of the eight work-loop skills: read the source end-to-end, write `skills/<name>/SKILL.md` applying the substitution table. Keep headings. Stay under ~500 lines (source files are 70–122 lines). Insert the `phases/INDEX.md` missing-in-cwd guard in skills that **write** hub files (`setup-tasks`, `task-1-plan`, `task-2-execute`, `task-3-complete`, `dialectic-of-cognition`, `bootstrap-turboplan`). Grill-me and audit-rules only read: if INDEX missing, say so and ask; do not invent a hub. → verify: `test -f skills/<name>/SKILL.md` for all eight; `grep -l 'Django\|Remix\|pnpm\|product-dashboard' skills/*/SKILL.md` is empty
 
 5. Write `skills/superplan-init/SKILL.md` stub (~40 lines, not a full init):
    - Frontmatter: `name: superplan-init`, `disable-model-invocation: true`, `model: opus`, `effort: high`, description that mentions planning workspace, project folder, product repos, and "use when the user wants to init Superplan / bind a hub".
@@ -140,7 +140,7 @@ effort: <high|medium as ColonyX>
 
 7. `make lint && make test && make verify`. Fix shellcheck in pack-check/tests. → verify: `make verify` exits 0
 
-8. Confirm `.cursor/skills/*/SKILL.md` still the original eight build-loop files (timestamps/content not replaced with ColonyX hub text). Confirm `~/.claude/skills` and `~/.cursor/skills` untouched. → verify: `grep -l 'phases/INDEX.md' .cursor/skills/task-1-plan/SKILL.md` is fine if it already mentioned planning/phases — do **not** rewrite those files. `test ! -e ~/.cursor/skills`
+8. Confirm `.cursor/skills/*/SKILL.md` still the original eight build-loop files (timestamps/content not replaced with hub-pack text). Confirm `~/.claude/skills` and `~/.cursor/skills` untouched. → verify: `grep -l 'phases/INDEX.md' .cursor/skills/task-1-plan/SKILL.md` is fine if it already mentioned planning/phases — do **not** rewrite those files. `test ! -e ~/.cursor/skills`
 
 ### Tests to add
 
@@ -166,8 +166,8 @@ make verify
 ### Risks / pitfalls
 
 - **Wrong skill tree:** editing `.cursor/skills/` instead of `skills/` — never do that
-- **Wrong hub paths:** using `planning/phases/` in the **pack** (that is Superplan-the-product). Pack hubs use `phases/` like ColonyX
-- Copying ColonyX files with `cp -R` into git is vendoring — rewrite
+- **Wrong hub paths:** using `planning/phases/` in the **pack** (that is Superplan-the-product). Pack hubs use `phases/` like a data-only hub
+- Copying source-hub files with `cp -R` into git is vendoring — rewrite
 - Leaving the T01 "good" fixture as `# stub` will fail once name-check lands — update tests in the same change as pack-check
 - `awk` on `name:` must ignore `name:` in the markdown body (frontmatter only)
 - T07 owns config-based hub resolution — do not invent `~/.superplan/config.yml` here
@@ -181,7 +181,7 @@ make verify
 - Real `/superplan-init` UX, `~/.superplan/config.yml`, hub templates (T05–T06)
 - Hub resolution from saved config (T07)
 - Live global install / dummy project (T08)
-- ColonyX product repos, Django/Remix rules
+- Product-repo stack rules
 - Rewriting Superplan `.cursor/skills/` or `.cursor/rules/` except if a spoke must mention the new pack layout (prefer not; T03-complete dialectic can)
 
 ### Execute model recommendation
@@ -202,7 +202,7 @@ make verify
 - [x] Full lint + test verify suite green
 - [x] Verification commands recorded and passing
 - [x] No secrets committed
-- [x] ColonyX, humanize, and turboplan trees not vendored
+- [x] humanize and turboplan trees not vendored
 
 ## Verification
 
@@ -256,7 +256,7 @@ make verify
 
 Success: `pack-check: 9 skill(s)`, nine `SKILL.md` files under `skills/`, `make verify` exits 0.
 
-Open any pack skill (e.g. `skills/grill-me/SKILL.md`) and confirm it talks about a planning hub (`CLAUDE.md`/`AGENTS.md`, `phases/`) — not Superplan's `.cursor/skills/` build loop, and not Django/Remix.
+Open any pack skill (e.g. `skills/grill-me/SKILL.md`) and confirm it talks about a planning hub (`CLAUDE.md`/`AGENTS.md`, `phases/`) — not Superplan's `.cursor/skills/` build loop, and not a specific product stack.
 
 Do **not** expect `/grill-me` in Claude or Cursor yet (install is T03). Do **not** run `./install.sh` against your real home.
 

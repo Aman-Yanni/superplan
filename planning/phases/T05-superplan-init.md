@@ -22,10 +22,10 @@ Implement `/superplan-init` in the published pack: ask for the **planning worksp
 ## Requirements
 
 - [x] Step 1: planning workspace path (create if missing after confirm); persist default (target `~/.superplan/config.yml`)
-- [x] Step 2: list existing folders; reuse if present (e.g. `ColonyX/`); else suggest a name, accept a user name, or accept a path they created
+- [x] Step 2: list existing folders; reuse if present (e.g. an existing folder); else suggest a name, accept a user name, or accept a path they created
 - [x] Step 3: search current folder **or** a work-folder path for project dirs; user multi-selects; or accept explicit paths
 - [x] Write/update hub `superplan.yml` with selected repo paths and `merge_prs: false`
-- [x] Tests use temp dirs, not the user’s real Claude Plans folder
+- [x] Tests use temp dirs, not the user’s real planning workspace
 
 ## Implementation Plan
 
@@ -34,8 +34,8 @@ Implement `/superplan-init` in the published pack: ask for the **planning worksp
 ### High-level notes (bootstrap)
 
 - Spoke: `.cursor/rules/planning-hub.mdc`
-- Example workspace: `/Users/aman/projects/Claude Plans`
-- First live test is a **dummy** project (T08), not ColonyX
+- Example workspace: `$HOME/plans`
+- First live test is a **dummy** project (T08), not an existing product hub
 - Skill must not treat cwd as the hub
 
 ## Execution plan (filled by /task-1-plan)
@@ -46,7 +46,7 @@ Implement `/superplan-init` in the published pack: ask for the **planning worksp
 
 ### Context for executor
 
-Replace the stub with a real init: interview in the pack skill, file writes via a **pack-local** helper `skills/superplan-init/init.sh` so a global symlink install can still run it. Tests drive the helper with a fake `HOME` and temp dirs. Do not write `CLAUDE.md` / `phases/` / `rules/` (T06). Do not live-install. Do not touch ColonyX.
+Replace the stub with a real init: interview in the pack skill, file writes via a **pack-local** helper `skills/superplan-init/init.sh` so a global symlink install can still run it. Tests drive the helper with a fake `HOME` and temp dirs. Do not write `CLAUDE.md` / `phases/` / `rules/` (T06). Do not live-install. Do not touch an existing product hub.
 
 Paths always `"$HOME/..."` never `~`.
 
@@ -68,11 +68,11 @@ Writes (not on `--discover`):
 2. `$hub/superplan.yml`: `merge_prs: false` and a `repos:` list of absolute paths (`repos: []` if none)
 3. `mkdir -p` the hub folder
 
-Do not write `CLAUDE.md`, `AGENTS.md`, `phases/`, `rules/`, or skill copies. Quote YAML strings (spaces in “Claude Plans”). If `--workspace` omitted, read `planning_workspace` from existing config.
+Do not write `CLAUDE.md`, `AGENTS.md`, `phases/`, `rules/`, or skill copies. Quote YAML strings (spaces in workspace paths). If `--workspace` omitted, read `planning_workspace` from existing config.
 
 ### Skill `SKILL.md`
 
-Full three-step interview. Then run `init.sh` next to this SKILL.md. Example workspace `/Users/aman/projects/Claude Plans`. Suggest a dummy name; do not default to ColonyX. Say T06 writes hub templates. Hard constraints: no `install.sh`, no real skill-dir writes, no `phases/` into cwd, cwd is not the hub.
+Full three-step interview. Then run `init.sh` next to this SKILL.md. Example workspace `$HOME/plans`. Suggest a dummy name; do not default to an existing product folder. Say T06 writes hub templates. Hard constraints: no `install.sh`, no real skill-dir writes, no `phases/` into cwd, cwd is not the hub.
 
 ### Tests (fake HOME)
 
@@ -91,7 +91,7 @@ Lint `skills/*/*.sh` as well as `tests/*.sh` `scripts/*.sh`.
 
 ### Out of scope
 
-Hub templates (T06). Config hub resolution in work-loop skills (T07). Live install / ColonyX (T08). `npx -g`.
+Hub templates (T06). Config hub resolution in work-loop skills (T07). Live install (T08). `npx -g`.
 
 ### Execute model recommendation
 
@@ -111,7 +111,7 @@ Hub templates (T06). Config hub resolution in work-loop skills (T07). Live insta
 - [x] Full lint + test verify suite green
 - [x] Verification commands recorded and passing
 - [x] No secrets committed
-- [x] Does not bind or modify ColonyX in this task
+- [x] Does not bind or modify an existing product hub in this task
 
 ## Verification
 
@@ -138,7 +138,7 @@ Init tests: `--help`; create workspace/hub/config; `merge_prs: false`; no `CLAUD
 
 ## Manual test (for humans)
 
-Do **not** point this at ColonyX or your real Claude Plans folder.
+Do **not** point this at an existing product hub or your real planning workspace.
 
 ```bash
 fake="$(mktemp -d)"
@@ -162,4 +162,4 @@ Success: config records the workspace; hub `superplan.yml` has `merge_prs: false
 
 ## Reality notes
 
-Init writes `$HOME/.superplan/config.yml` and `<hub>/superplan.yml` only. T06 must add templates without wiping `superplan.yml` or user `rules/` (rules/ does not exist yet until T06). First dummy hub name is not ColonyX.
+Init writes `$HOME/.superplan/config.yml` and `<hub>/superplan.yml` only. T06 must add templates without wiping `superplan.yml` or user `rules/` (rules/ does not exist yet until T06). First dummy hub name is not an existing product hub.

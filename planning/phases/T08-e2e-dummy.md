@@ -8,7 +8,7 @@
 
 ## Description
 
-Prove the whole loop on a **dummy** project (not ColonyX): live-install the pack for Claude Code and Cursor (symlink), init a hub under a temp or user-chosen planning workspace, bind a dummy git repo, confirm skills appear in both agents and the hub is data-only. Requires explicit human OK before writing into real `~/.claude/skills` / `~/.cursor/skills`.
+Prove the whole loop on a **dummy** project (not an existing product hub): live-install the pack for Claude Code and Cursor (symlink), init a hub under a temp or user-chosen planning workspace, bind a dummy git repo, confirm skills appear in both agents and the hub is data-only. Requires explicit human OK before writing into real `~/.claude/skills` / `~/.cursor/skills`.
 
 ## Status History
 
@@ -33,7 +33,7 @@ Prove the whole loop on a **dummy** project (not ColonyX): live-install the pack
 
 ### High-level notes (bootstrap)
 
-- Human chose dummy, not ColonyX, as the first bind
+- Human chose dummy, not an existing product hub, as the first bind
 - If live-install is declined, record Blocked vs a documented dry-run — do not silently skip
 - Uninstall notes: how to remove the dummy hub and the symlinks
 
@@ -45,14 +45,14 @@ Prove the whole loop on a **dummy** project (not ColonyX): live-install the pack
 
 ### Context for executor
 
-Live-install with symlink `./install.sh all`. Init `DummySuperplan` under `/Users/aman/projects/Claude Plans`, bind `/Users/aman/projects/other/dummy-superplan`. Do not touch ColonyX. Do not `npx`. Do not create a GitHub remote.
+Live-install with symlink `./install.sh all`. Init `DummySuperplan` under `$HOME/plans`, bind `<dummy-repo>`. Do not touch an existing product hub. Do not `npx`. Do not create a GitHub remote.
 
 ### Steps
 
-1. Snapshot real skill dirs and ColonyX. → verify: humanize only; ColonyX exists
+1. Snapshot real skill dirs and existing hubs. → verify: unrelated skills untouched; existing hubs exist
 2. `git init` dummy repo outside this git tree. → verify: `.git` exists
 3. `./install.sh all` with real HOME. → verify: both `grill-me/SKILL.md`; readlink into this pack; humanize remains
-4. Run `init.sh` for DummySuperplan + dummy repo. → verify: data-only hub; config.yml; ColonyX listing unchanged
+4. Run `init.sh` for DummySuperplan + dummy repo. → verify: data-only hub; config.yml; other hub folders unchanged
 5. `make verify`. README uninstall notes. → verify: `make verify` 0
 
 ### Tests to add
@@ -61,7 +61,7 @@ None against real HOME.
 
 ### Out of scope
 
-`npx skills add -g`. GitHub remote. ColonyX bind.
+`npx skills add -g`. GitHub remote. bind an existing product hub.
 
 ### Execute model recommendation
 
@@ -82,7 +82,7 @@ None against real HOME.
 - [x] Full lint + test verify suite green
 - [x] Verification commands recorded and passing
 - [x] No secrets committed
-- [x] ColonyX tree unmodified
+- [x] existing product hubs unmodified
 
 ## Verification
 
@@ -93,12 +93,12 @@ Live (2026-09-16), human OK for `./install.sh all` only (no `npx`, no git remote
 test -f ~/.claude/skills/grill-me/SKILL.md   # symlink → …/superplan/skills/grill-me
 test -f ~/.cursor/skills/grill-me/SKILL.md
 test -e ~/.claude/skills/humanize            # still present
-init.sh --workspace "/Users/aman/projects/Claude Plans" --hub DummySuperplan \
-  --repo /Users/aman/projects/other/dummy-superplan
+init.sh --workspace "$HOME/plans" --hub DummySuperplan \
+  --repo <dummy-repo>
 make verify
 ```
 
-Hub is data-only (no `.claude/skills`). ColonyX still listed beside DummySuperplan. `~/.superplan/config.yml` points at that hub.
+Hub is data-only (no `.claude/skills`). Other workspace folders remain beside DummySuperplan. `~/.superplan/config.yml` points at that hub.
 
 ## Files Modified
 
@@ -107,7 +107,7 @@ Hub is data-only (no `.claude/skills`). ColonyX still listed beside DummySuperpl
 - `planning/phases/T08-e2e-dummy.md`
 - `planning/phases/INDEX.md`
 
-Outside this repo (not committed): `/Users/aman/projects/other/dummy-superplan`, `/Users/aman/projects/Claude Plans/DummySuperplan`, `~/.superplan/config.yml`, skill symlinks.
+Outside this repo (not committed): `<dummy-repo>`, `$HOME/plans/DummySuperplan`, `~/.superplan/config.yml`, skill symlinks.
 
 ## Manual test (for humans)
 
@@ -115,10 +115,10 @@ Restart **Cursor** and **Claude Code** so they reload personal skills.
 
 1. Confirm dests:
    `ls -l ~/.cursor/skills/grill-me ~/.claude/skills/grill-me ~/.claude/skills/humanize`
-2. In Cursor: **File → Open Folder** on `/Users/aman/projects/Claude Plans/DummySuperplan`. **Add Folder to Workspace** for `/Users/aman/projects/other/dummy-superplan`. Type `/grill-me` in chat. Success: the skill runs (it should ask where the hub is only if config is missing — config is already `~/.superplan/config.yml`).
+2. In Cursor: **File → Open Folder** on `$HOME/plans/DummySuperplan`. **Add Folder to Workspace** for `<dummy-repo>`. Type `/grill-me` in chat. Success: the skill runs (it should ask where the hub is only if config is missing — config is already `~/.superplan/config.yml`).
 3. Same `/grill-me` in a Claude Code session started from the DummySuperplan folder.
 
-Uninstall: see README **Uninstall**. Do not delete `humanize`. Do not delete ColonyX.
+Uninstall: see README **Uninstall**. Do not delete `humanize`. Do not delete unrelated hubs.
 
 ## Learnings
 
@@ -127,4 +127,4 @@ Uninstall: see README **Uninstall**. Do not delete `humanize`. Do not delete Col
 
 ## Reality notes
 
-T08 live-installed with `./install.sh all`. Dummy hub: `/Users/aman/projects/Claude Plans/DummySuperplan`. Dummy repo: `/Users/aman/projects/other/dummy-superplan`. No GitHub remote. `npx skills add -g` not used.
+T08 live-installed with `./install.sh all`. Dummy hub: `$HOME/plans/DummySuperplan`. Dummy repo: `<dummy-repo>`. No GitHub remote. `npx skills add -g` not used.

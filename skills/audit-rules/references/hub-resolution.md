@@ -6,7 +6,7 @@ or `rules/` into a bound product repo is a bug.
 ## Steps
 
 1. Read `"$HOME/.superplan/config.yml"` (not `~`). If it is missing, or has no
-   `planning_workspace` / `hub`, **stop and ask**. Do not guess ColonyX or cwd.
+   `planning_workspace` / `hub`, **stop and ask**. Do not guess a hub folder or cwd.
 2. The hub directory is the `hub:` path. Confirm `<hub>/superplan.yml` exists.
    If it does not, ask — do not create a hub from a work-loop skill (that is
    `/superplan-init`).
