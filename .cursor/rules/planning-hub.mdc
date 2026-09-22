@@ -10,7 +10,7 @@ alwaysApply: false
 
 What this spoke covers:
 
-- Planning workspace path (asked first)
+- Hub path: cwd / ancestor with `superplan.yml`, else ask
 - Per-project hub folders (create or reuse)
 - Binding one or more product repos
 - Repo-rules-first, conflict handling, merge default
@@ -25,9 +25,9 @@ What this spoke does **not** cover (route elsewhere):
 1. **Skills are global. Hubs are data.** A hub holds `CLAUDE.md`/`AGENTS.md`,
    `rules/`, `phases/`, `templates/`, and a small config (`superplan.yml`).
    It does not copy Superplan skills.
-2. **Planning workspace first.** Init asks for the workspace path (example:
-   `$HOME/plans`) and saves it as the default. Then it
-   deals with the project folder inside that workspace.
+2. **Current path first.** If cwd or an ancestor has `superplan.yml`, that
+   directory is the hub. Otherwise init (and work-loop skills) ask for a hub
+   path. Do not read a machine-wide `hub:` default.
 3. **Reuse before create.** If `<workspace>/<name>/` already exists, reuse it.
    If it does not, suggest a folder name, or let the user name it, or accept a
    path they already created.
@@ -43,26 +43,22 @@ What this spoke does **not** cover (route elsewhere):
 6. **Close-out never merges** unless that hub's config (or the invocation)
    opts in. Default: open PRs, stop. Do not create remotes unless the user
    asks.
-7. Global skills must **resolve the hub from config**, not from cwd. Read
-   `"$HOME/.superplan/config.yml"` (`planning_workspace` and `hub`) and
-   `<hub>/superplan.yml`. Writing `phases/` into a product repo is a bug.
+7. Global skills resolve the hub **per project**: nearest `superplan.yml`
+   walking up from cwd, otherwise they ask. They never read
+   `$HOME/.superplan/config.yml`. Writing `phases/` into a product repo is a bug.
 
 ## Init sequence (product)
 
 ```
-1. Planning workspace path → save default
-2. List existing folders there → select or create <project>/
+1. cwd / ancestor with superplan.yml → that hub
+2. else ask for a hub path (create if needed)
 3. Discover product repos (cwd search OR work-folder path) → user selects
 4. Write or refresh the data-only hub; bind repos; agent access config
 ```
 
-Saved default (target): `~/.superplan/config.yml` → `planning_workspace`.
-Per hub (target): `<hub>/superplan.yml` → repos, `merge_prs: false`.
-
-Init file writes (until hub templates land) are **config only**: those two
-YAML files plus the workspace/hub directories. The helper is
-`skills/superplan-init/init.sh` (next to the pack `SKILL.md`, so a global
-symlink install can still run it). It must use `"$HOME/.superplan"`, not `~`.
+Per hub: `<hub>/superplan.yml` → repos, `merge_prs: false`.
+No machine-wide hub file. The helper is `skills/superplan-init/init.sh`
+(next to the pack `SKILL.md`, so a global symlink install can still run it).
 
 ## Docs (if stuck):
 
@@ -80,7 +76,7 @@ Also: hub `CLAUDE.md` (repo-rules-first, additionalDirectories).
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub | Read `"$HOME/.superplan/config.yml"` (`hub:`) and `<hub>/superplan.yml`. Follow `references/hub-resolution.md`. Refuse to write hub files into a bound product repo. |
+| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub without checking for `superplan.yml` | Walk up from cwd for `superplan.yml`; otherwise ask for the hub path. Follow `references/hub-resolution.md`. Refuse to write hub files into a bound product repo. |
 
 <!-- last-verified: 2026-09 -->
 

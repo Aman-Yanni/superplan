@@ -4,16 +4,34 @@ set -euo pipefail
 usage() {
 	cat <<'EOF'
 Usage:
-  init.sh --workspace PATH --hub NAME [--create-workspace] [--repo PATH ...]
+  init.sh --hub NAME_OR_PATH [--workspace PATH] [--create-workspace] [--repo PATH ...]
   init.sh --discover PATH
   init.sh -h, --help
 
-  --workspace PATH     planning workspace directory
-  --create-workspace   create workspace if missing
-  --hub NAME_OR_PATH   folder under workspace, or an absolute/relative path
+  With no --hub, uses cwd (or an ancestor) when it contains superplan.yml.
+
+  --hub NAME_OR_PATH   hub directory, or a folder name under --workspace / cwd
+  --workspace PATH     optional parent for a bare --hub name
+  --create-workspace   create --workspace if missing
   --repo PATH          bound product repo (repeatable); must exist
   --discover PATH      list git dirs (PATH and its immediate children); no writes
 EOF
+}
+
+find_hub_up() {
+	local d
+	d="$(cd "${1:-.}" && pwd)" || return 1
+	while [[ -n "$d" ]]; do
+		if [[ -f "$d/superplan.yml" ]]; then
+			printf '%s' "$d"
+			return 0
+		fi
+		if [[ "$d" == / ]]; then
+			return 1
+		fi
+		d="$(dirname "$d")"
+	done
+	return 1
 }
 
 yaml_quote() {
@@ -141,7 +159,6 @@ write_hub_files() {
 	} >"$hub/.claude/settings.json"
 }
 
-CONFIG_DIR_REL=".superplan"
 workspace=""
 hub_arg=""
 create_ws=0
@@ -191,42 +208,39 @@ if [[ -n "$do_discover" ]]; then
 	exit 0
 fi
 
-config_file="$HOME/$CONFIG_DIR_REL/config.yml"
-
-if [[ -z "$workspace" && -f "$config_file" ]]; then
-	workspace="$(awk -F': *' '/^planning_workspace:/{gsub(/^[ \t"]+|[ \t"]+$/, "", $2); print $2; exit}' "$config_file")"
-fi
-
-if [[ -z "$workspace" ]]; then
-	echo "init: --workspace is required (no saved planning_workspace)" >&2
-	exit 2
-fi
-
-if [[ -z "$hub_arg" ]]; then
-	echo "init: --hub is required" >&2
-	exit 2
-fi
-
-if [[ ! -d "$workspace" ]]; then
-	if [[ "$create_ws" -eq 1 ]]; then
-		mkdir -p "$workspace"
-	else
-		echo "init: workspace does not exist (pass --create-workspace): $workspace" >&2
-		exit 1
-	fi
-fi
-workspace="$(cd "$workspace" && pwd)"
-
 hub=""
-if [[ "$hub_arg" == /* || "$hub_arg" == */* ]]; then
-	if [[ ! -d "$hub_arg" ]]; then
-		mkdir -p "$hub_arg"
+if [[ -z "$hub_arg" ]]; then
+	if hub="$(find_hub_up .)"; then
+		:
+	else
+		echo "init: --hub is required (cwd has no superplan.yml)" >&2
+		exit 2
 	fi
-	hub="$(cd "$hub_arg" && pwd)"
-else
-	hub="$workspace/$hub_arg"
-	mkdir -p "$hub"
-	hub="$(cd "$hub" && pwd)"
+fi
+
+if [[ -n "$hub_arg" ]]; then
+	if [[ -n "$workspace" ]]; then
+		if [[ ! -d "$workspace" ]]; then
+			if [[ "$create_ws" -eq 1 ]]; then
+				mkdir -p "$workspace"
+			else
+				echo "init: workspace does not exist (pass --create-workspace): $workspace" >&2
+				exit 1
+			fi
+		fi
+		workspace="$(cd "$workspace" && pwd)"
+	fi
+	if [[ "$hub_arg" == /* || "$hub_arg" == */* ]]; then
+		mkdir -p "$hub_arg"
+		hub="$(cd "$hub_arg" && pwd)"
+	elif [[ -n "$workspace" ]]; then
+		hub="$workspace/$hub_arg"
+		mkdir -p "$hub"
+		hub="$(cd "$hub" && pwd)"
+	else
+		mkdir -p "$hub_arg"
+		hub="$(cd "$hub_arg" && pwd)"
+	fi
 fi
 
 resolved_repos=()
@@ -238,33 +252,41 @@ for r in "${repos[@]+"${repos[@]}"}"; do
 	resolved_repos+=("$(cd "$r" && pwd)")
 done
 
-mkdir -p "$HOME/$CONFIG_DIR_REL"
-{
-	printf 'planning_workspace: '
-	yaml_quote "$workspace"
-	printf '\n'
-	printf 'hub: '
-	yaml_quote "$hub"
-	printf '\n'
-} >"$config_file"
-
-{
-	printf 'merge_prs: false\n'
-	if [[ "${#resolved_repos[@]}" -eq 0 ]]; then
-		printf 'repos: []\n'
-	else
-		printf 'repos:\n'
-		for r in "${resolved_repos[@]}"; do
-			printf '  - '
-			yaml_quote "$r"
-			printf '\n'
-		done
-	fi
-} >"$hub/superplan.yml"
+write_superplan_yml=1
+if [[ -f "$hub/superplan.yml" && ${#repos[@]} -eq 0 ]]; then
+	write_superplan_yml=0
+fi
+if [[ "$write_superplan_yml" -eq 1 ]]; then
+	{
+		printf 'merge_prs: false\n'
+		if [[ "${#resolved_repos[@]}" -eq 0 ]]; then
+			printf 'repos: []\n'
+		else
+			printf 'repos:\n'
+			for r in "${resolved_repos[@]}"; do
+				printf '  - '
+				yaml_quote "$r"
+				printf '\n'
+			done
+		fi
+	} >"$hub/superplan.yml"
+else
+	resolved_repos=()
+	while IFS= read -r line; do
+		case "$line" in
+		'  - "'*)
+			line="${line#  - \"}"
+			line="${line%\"}"
+			resolved_repos+=("$line")
+			;;
+		esac
+	done <"$hub/superplan.yml"
+fi
 
 write_hub_files
 
-printf 'init: workspace %s\n' "$workspace"
+if [[ -n "$workspace" ]]; then
+	printf 'init: workspace %s\n' "$workspace"
+fi
 printf 'init: hub %s\n' "$hub"
-printf 'init: wrote %s\n' "$config_file"
 printf 'init: wrote %s/superplan.yml\n' "$hub"

@@ -263,13 +263,13 @@ ws="$(newtmp)/My Plans"
 repo1="$(newtmp)/app"
 mkdir -p "$repo1/.git"
 HOME="$fake_init_home" run_cmd "$INIT" --workspace "$ws" --create-workspace --hub Dummy --repo "$repo1"
-if [[ "$run_code" -eq 0 && -f "$fake_init_home/.superplan/config.yml" && -f "$ws/Dummy/superplan.yml" ]]; then
-	ok "init.sh creates workspace hub and config"
+if [[ "$run_code" -eq 0 && -f "$ws/Dummy/superplan.yml" && ! -e "$fake_init_home/.superplan" ]]; then
+	ok "init.sh creates hub without machine-wide config"
 else
 	not_ok "init.sh create (code=$run_code err=$run_err)"
 fi
-if grep -q 'planning_workspace:' "$fake_init_home/.superplan/config.yml" && grep -q 'hub:' "$fake_init_home/.superplan/config.yml" && grep -q 'merge_prs: false' "$ws/Dummy/superplan.yml" && grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
-	ok "init.sh yaml has workspace, hub, merge_prs false, repo"
+if grep -q 'merge_prs: false' "$ws/Dummy/superplan.yml" && grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
+	ok "init.sh yaml has merge_prs false and repo"
 else
 	not_ok "init.sh yaml contents"
 fi
@@ -284,7 +284,7 @@ else
 	not_ok "init.sh hub skills or additionalDirectories"
 fi
 printf 'keep-me\n' >"$ws/Dummy/rules/keep.md"
-HOME="$fake_init_home" run_cmd "$INIT" --hub Dummy --repo "$repo1"
+HOME="$fake_init_home" run_cmd "$INIT" --hub "$ws/Dummy" --repo "$repo1"
 if [[ -f "$ws/Dummy/rules/keep.md" ]] && grep -q 'keep-me' "$ws/Dummy/rules/keep.md"; then
 	ok "init.sh refresh preserves user rules"
 else
@@ -293,11 +293,49 @@ fi
 
 repo2="$(newtmp)/other"
 mkdir -p "$repo2/.git"
-HOME="$fake_init_home" run_cmd "$INIT" --hub Dummy --repo "$repo2"
+HOME="$fake_init_home" run_cmd "$INIT" --hub "$ws/Dummy" --repo "$repo2"
 if [[ "$run_code" -eq 0 ]] && grep -q "$repo2" "$ws/Dummy/superplan.yml" && ! grep -q "$repo1" "$ws/Dummy/superplan.yml"; then
-	ok "init.sh reuse hub replaces repos from saved workspace"
+	ok "init.sh reuse hub replaces repos"
 else
 	not_ok "init.sh reuse (code=$run_code err=$run_err)"
+fi
+
+cwd_home="$(newtmp)"
+outf="$(newtmp)/out"
+errf="$(newtmp)/err"
+run_code=0
+(cd "$ws/Dummy" && HOME="$cwd_home" "$INIT" >"$outf" 2>"$errf") || run_code=$?
+run_out="$(cat "$outf")"
+run_err="$(cat "$errf")"
+if [[ "$run_code" -eq 0 && "$run_out" == *"$ws/Dummy"* && ! -e "$cwd_home/.superplan" ]] && grep -q "$repo2" "$ws/Dummy/superplan.yml"; then
+	ok "init.sh cwd with superplan.yml is the hub"
+else
+	not_ok "init.sh cwd hub (code=$run_code out=$run_out err=$run_err)"
+fi
+
+walk_home="$(newtmp)"
+outf="$(newtmp)/out"
+errf="$(newtmp)/err"
+run_code=0
+(cd "$ws/Dummy/phases" && HOME="$walk_home" "$INIT" >"$outf" 2>"$errf") || run_code=$?
+run_out="$(cat "$outf")"
+run_err="$(cat "$errf")"
+if [[ "$run_code" -eq 0 && "$run_out" == *"$ws/Dummy"* && "$run_out" != *"/phases"* ]]; then
+	ok "init.sh walks up from cwd to superplan.yml"
+else
+	not_ok "init.sh walk-up (code=$run_code out=$run_out err=$run_err)"
+fi
+
+empty="$(newtmp)"
+outf="$(newtmp)/out"
+errf="$(newtmp)/err"
+run_code=0
+(cd "$empty" && HOME="$(newtmp)" "$INIT" >"$outf" 2>"$errf") || run_code=$?
+run_err="$(cat "$errf")"
+if [[ "$run_code" -eq 2 && "$run_err" == *"--hub is required"* ]]; then
+	ok "init.sh without hub or superplan.yml asks for --hub"
+else
+	not_ok "init.sh missing hub (code=$run_code err=$run_err)"
 fi
 
 missing_ws="$(newtmp)/no-such-ws"

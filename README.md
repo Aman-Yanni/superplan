@@ -41,7 +41,7 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 ## 🛠️ The fix (target)
 
 - **One pack**, installed globally for **Claude Code, Cursor, and OpenCode**.
-- **Planning workspace first** (e.g. `$HOME/plans`), then a per-project hub folder (create a name you choose).
+- **Hub is the current project.** If this folder (or a parent) has `superplan.yml`, that is the hub. Otherwise `/superplan-init` asks for a path.
 - **Select product repos** by searching the current folder or a work-folder path you give.
 - Hubs are **data-only**: `CLAUDE.md` / `AGENTS.md`, `rules/`, `phases/`. Skills stay global.
 - **Repo rules win.** Hub spokes add routing and cross-repo notes; they do not replace a repo's own docs. Conflicts are reported and asked about.
@@ -54,11 +54,11 @@ you ──► ./install.sh (or npx skills add -g)
             │                 → ~/.config/opencode/skills
             ▼
         /superplan-init
-            │  1. planning workspace path
-            │  2. existing hub folder or create one
+            │  1. cwd if it already has superplan.yml
+            │  2. otherwise ask for a hub path
             │  3. pick product repos
             ▼
-        <workspace>/<project>/   (data-only hub)
+        <hub>/   (data-only: superplan.yml, phases/, rules/)
             + bound repos on disk (unchanged)
 ```
 
@@ -129,7 +129,7 @@ for n in audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-t
 done
 ```
 
-If you created a dummy hub, delete that folder under your planning workspace. Config: `~/.superplan/config.yml`.
+If you created a dummy hub, delete that folder. The marker file is `<hub>/superplan.yml`.
 
 ## 📂 Repo layout
 
@@ -179,7 +179,7 @@ See [`planning/phases/INDEX.md`](planning/phases/INDEX.md). T01–T08 are comple
 - Do not overwrite unrelated skills in `~/.claude/skills`, `~/.cursor/skills`, or `~/.config/opencode/skills`.
 - Never edit a bound product repo's own rules without approval; repo docs win on conflict.
 - Close-out never merges unless you opt in. No remotes created by default.
-- Global skills must not write `phases/` into a product repo — the hub path comes from config.
+- Global skills must not write `phases/` into a product repo — the hub is the nearest `superplan.yml` from cwd, or a path the human gives.
 
 ## 📜 License / attribution
 

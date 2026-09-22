@@ -18,8 +18,9 @@ Read-only. Flag findings; never fix or remove anything.
 
 Scope: $ARGUMENTS
 
-Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
-as the hub. If the hub cannot be resolved, say so and ask. Do not invent a hub.
+Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
+for `superplan.yml`; otherwise ask for the hub path.
+If the hub cannot be resolved, say so and ask. Do not invent a hub.
 
 ## Constraints
 

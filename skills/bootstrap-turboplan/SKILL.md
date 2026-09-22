@@ -21,8 +21,9 @@ change any product repo.
 
 Input: $ARGUMENTS
 
-Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
-as the hub. If the hub cannot be resolved, **stop and ask**. Do not write hub
+Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
+for `superplan.yml`; otherwise ask for the hub path.
+If the hub cannot be resolved, **stop and ask**. Do not write hub
 files into a product repo.
 
 If the input doesn't say what changed or which repos are in scope, ask before

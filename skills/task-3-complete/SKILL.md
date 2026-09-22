@@ -25,8 +25,9 @@ Arguments: $ARGUMENTS
 - Task id — default: the INDEX `InProgress` row, else the task executed in this conversation.
 - `--no-push` — commit locally only: no push, no PR, no PR reviews.
 
-Resolve the hub first — read `references/hub-resolution.md`. Do not treat cwd
-as the hub. If the hub cannot be resolved, **stop and ask**. Do not write hub
+Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
+for `superplan.yml`; otherwise ask for the hub path.
+If the hub cannot be resolved, **stop and ask**. Do not write hub
 files into a product repo.
 
 ## Hard constraints
