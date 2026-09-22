@@ -35,14 +35,14 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 
 | What you try | What happens |
 | ------------ | ------------ |
-| Copy turboplan skills into every planning folder (ColonyX-style) | Skills drift per project; they only work when that folder is cwd |
+| Copy turboplan skills into every planning folder | Skills drift per project; they only work when that folder is cwd |
 | Use Claude or Cursor on several product repos at once | Each tool wants its own skill dir; hubs and product code get mixed |
 | Install a skill globally | Easy to land in the wrong folder (`~/.agents/skills` vs `~/.cursor/skills`) |
 
 ## 🛠️ The fix (target)
 
 - **One pack**, installed globally for **Claude Code, Cursor, and OpenCode**.
-- **Planning workspace first** (e.g. `/Users/aman/projects/Claude Plans`), then a per-project hub folder (reuse `ColonyX/` if it exists, or create a name you choose).
+- **Planning workspace first** (e.g. `/Users/aman/projects/Claude Plans`), then a per-project hub folder (create a name you choose).
 - **Select product repos** by searching the current folder or a work-folder path you give.
 - Hubs are **data-only**: `CLAUDE.md` / `AGENTS.md`, `rules/`, `phases/`. Skills stay global.
 - **Repo rules win.** Hub spokes add routing and cross-repo notes; they do not replace a repo's own docs. Conflicts are reported and asked about.
@@ -155,7 +155,7 @@ Human-facing summary. Agents get detail in matching `.cursor/rules/*.mdc` spokes
 | Claude Code | Personal skills + `additionalDirectories` | [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) | [`.cursor/rules/claude-code.mdc`](.cursor/rules/claude-code.mdc) |
 | Cursor Skills | Personal `~/.cursor/skills` | [cursor.com/docs/skills](https://cursor.com/docs/skills) | [`.cursor/rules/cursor-skills.mdc`](.cursor/rules/cursor-skills.mdc) |
 | OpenCode | Personal `~/.config/opencode/skills` (DeepSeek and other models) | [opencode.ai/docs/skills](https://opencode.ai/docs/skills/) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
-| Planning hub | Workspace, data-only hubs, repo-rules-first | ColonyX `README.md` / `CLAUDE.md` | [`.cursor/rules/planning-hub.mdc`](.cursor/rules/planning-hub.mdc) |
+| Planning hub | Workspace, data-only hubs, repo-rules-first `README.md` / `CLAUDE.md` | [`.cursor/rules/planning-hub.mdc`](.cursor/rules/planning-hub.mdc) |
 | install.sh | Agent-select symlink installer | [humanize install.sh](https://github.com/harshaneel/humanize/blob/main/install.sh) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
 | shellcheck / lefthook | Lint + pre-commit verify | [shellcheck wiki](https://www.shellcheck.net/wiki/) · [lefthook](https://lefthook.dev/) | [`.cursor/rules/shell.mdc`](.cursor/rules/shell.mdc) |
 
@@ -187,7 +187,5 @@ First action after reviewing this bootstrap: `/task-1-plan T01`.
 ## 📜 License / attribution
 
 Methodology and original skills: [commoddity/turboplan](https://github.com/commoddity/turboplan) (MIT).
-
-Claude-side multi-repo port this product generalizes: local ColonyX hub at `/Users/aman/projects/Claude Plans/ColonyX`.
 
 Installer shape: [harshaneel/humanize `install.sh`](https://github.com/harshaneel/humanize/blob/main/install.sh).
