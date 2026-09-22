@@ -11,7 +11,8 @@
 
 ## Summary
 
-Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is the ColonyX turboplan port, generalized: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a dummy project without copying skills into that hub.
+Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is the
+turboplan(https://github.com/commoddity/turboplan) port, generalized: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a dummy project without copying skills into that hub.
 
 Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agent rules + phased delivery).
 
