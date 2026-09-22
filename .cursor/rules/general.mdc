@@ -189,8 +189,9 @@ NEVER do these without explicit user approval:
 - Force-push, rewrite shared history, or push secrets
 - Write into a bound product repo's own rules (`CLAUDE.md`, `AGENTS.md`,
   `.cursor/rules/`, `.claude/`) — propose the edit instead
-- Install or overwrite skills under `~/.claude/skills/` or `~/.cursor/skills/`
-  except when the current task is the installer and the user asked
+- Install or overwrite skills under `~/.claude/skills/`, `~/.cursor/skills/`,
+  or `~/.config/opencode/skills/` except when the current task is the installer
+  and the user asked
 - Merge pull requests (default is never merge; the user may opt in per hub)
 - Create a GitHub remote or publish to skills.sh
 

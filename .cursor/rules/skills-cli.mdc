@@ -11,7 +11,7 @@ alwaysApply: false
 What this spoke covers:
 
 - `npx skills add|ls|remove|update` as the published install path
-- Agent flags (`-a claude-code -a cursor`), global (`-g`), symlink vs `--copy`
+- Agent flags (`-a claude-code -a cursor -a opencode`), global (`-g`), symlink vs `--copy`
 
 What this spoke does **not** cover (route elsewhere):
 
@@ -24,9 +24,12 @@ What this spoke does **not** cover (route elsewhere):
    also `npx skills add <owner>/superplan -g` with agent selection.
 2. Always pass `-a claude-code -a cursor` (or let the CLI prompt). Do not rely
    on auto-detect alone — Cursor global dest has historically been wrong
-   (`~/.agents/skills` vs `~/.cursor/skills`).
-3. After any `npx skills add -g`, verify **both** destinations exist:
+   (`~/.agents/skills` vs `~/.cursor/skills`). For OpenCode/DeepSeek, also
+   pass `-a opencode`, then confirm `$HOME/.config/opencode/skills/<name>/SKILL.md`.
+   Prefer `./install.sh opencode` for that native dest.
+3. After any `npx skills add -g`, verify **both** Claude and Cursor destinations exist:
    `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (symlink or copy).
+   If OpenCode was selected, also verify `~/.config/opencode/skills/<name>`.
 4. Default mode is symlink. `--copy` only when the user asks or the filesystem
    cannot symlink.
 5. Do not publish to the skills.sh registry or create a GitHub remote unless

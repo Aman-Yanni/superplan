@@ -12,6 +12,7 @@ fixtures=()
 REAL_HOME="$HOME"
 real_claude="$(ls -A "$REAL_HOME/.claude/skills" 2>/dev/null || true)"
 real_cursor="$(ls -A "$REAL_HOME/.cursor/skills" 2>/dev/null || true)"
+real_opencode="$(ls -A "$REAL_HOME/.config/opencode/skills" 2>/dev/null || true)"
 real_superplan="$(ls -A "$REAL_HOME/.superplan" 2>/dev/null || true)"
 
 PACK_NAMES="audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks superplan-init task-1-plan task-2-execute task-3-complete"
@@ -85,7 +86,7 @@ assert_nine_links() {
 }
 
 run_cmd "$INSTALL" --help
-if [[ "$run_code" -eq 0 && "$run_out" == *Usage* ]]; then
+if [[ "$run_code" -eq 0 && "$run_out" == *Usage* && "$run_out" == *opencode* ]]; then
 	ok "install.sh --help"
 else
 	not_ok "install.sh --help (code=$run_code)"
@@ -121,6 +122,7 @@ else
 fi
 assert_nine_links "$fake_all/.claude/skills" "all claude"
 assert_nine_links "$fake_all/.cursor/skills" "all cursor"
+assert_nine_links "$fake_all/.config/opencode/skills" "all opencode"
 
 HOME="$fake_all" run_cmd "$INSTALL" all
 if [[ "$run_code" -eq 0 ]]; then
@@ -136,10 +138,10 @@ if [[ "$run_code" -eq 0 && ("$run_out" == *copy* || "$run_out" == *copied*) ]]; 
 else
 	not_ok "install.sh --copy cursor (code=$run_code out=$run_out err=$run_err)"
 fi
-if [[ ! -e "$fake_copy/.claude" ]]; then
-	ok "--copy cursor does not create claude dest"
+if [[ ! -e "$fake_copy/.claude" && ! -e "$fake_copy/.config" ]]; then
+	ok "--copy cursor does not create claude or opencode dest"
 else
-	not_ok "--copy cursor created claude dest"
+	not_ok "--copy cursor created extra dest"
 fi
 if [[ -d "$fake_copy/.cursor/skills/grill-me" && ! -L "$fake_copy/.cursor/skills/grill-me" && -f "$fake_copy/.cursor/skills/grill-me/SKILL.md" && "$(cat "$fake_copy/.cursor/skills/grill-me/.superplan-install")" == "$ROOT/skills/grill-me" ]]; then
 	ok "--copy cursor grill-me is a marked copy"
@@ -163,14 +165,52 @@ else
 fi
 
 fake_int="$(newtmp)"
-HOME="$fake_int" run_cmd_in $'3\n' "$INSTALL"
+HOME="$fake_int" run_cmd_in $'4\n' "$INSTALL"
+if [[ "$run_code" -eq 0 ]]; then
+	ok "install.sh interactive 4 exits 0"
+else
+	not_ok "install.sh interactive 4 (code=$run_code err=$run_err)"
+fi
+assert_nine_links "$fake_int/.claude/skills" "interactive claude"
+assert_nine_links "$fake_int/.cursor/skills" "interactive cursor"
+assert_nine_links "$fake_int/.config/opencode/skills" "interactive opencode"
+
+fake_oc="$(newtmp)"
+HOME="$fake_oc" run_cmd "$INSTALL" opencode
+if [[ "$run_code" -eq 0 ]]; then
+	ok "install.sh opencode exits 0"
+else
+	not_ok "install.sh opencode (code=$run_code err=$run_err)"
+fi
+assert_nine_links "$fake_oc/.config/opencode/skills" "opencode dest"
+if [[ ! -e "$fake_oc/.claude" && ! -e "$fake_oc/.cursor" ]]; then
+	ok "opencode does not create claude or cursor dest"
+else
+	not_ok "opencode created extra dest"
+fi
+
+fake_ds="$(newtmp)"
+HOME="$fake_ds" run_cmd "$INSTALL" deepseek
+if [[ "$run_code" -eq 0 ]]; then
+	ok "install.sh deepseek exits 0"
+else
+	not_ok "install.sh deepseek (code=$run_code err=$run_err)"
+fi
+assert_nine_links "$fake_ds/.config/opencode/skills" "deepseek dest"
+
+fake_int_oc="$(newtmp)"
+HOME="$fake_int_oc" run_cmd_in $'3\n' "$INSTALL"
 if [[ "$run_code" -eq 0 ]]; then
 	ok "install.sh interactive 3 exits 0"
 else
 	not_ok "install.sh interactive 3 (code=$run_code err=$run_err)"
 fi
-assert_nine_links "$fake_int/.claude/skills" "interactive claude"
-assert_nine_links "$fake_int/.cursor/skills" "interactive cursor"
+assert_nine_links "$fake_int_oc/.config/opencode/skills" "interactive 3 opencode"
+if [[ ! -e "$fake_int_oc/.claude" && ! -e "$fake_int_oc/.cursor" ]]; then
+	ok "interactive 3 does not create claude or cursor dest"
+else
+	not_ok "interactive 3 created extra dest"
+fi
 
 if [[ "$(ls -A "$REAL_HOME/.claude/skills" 2>/dev/null || true)" == "$real_claude" ]]; then
 	ok "real ~/.claude/skills unchanged"
@@ -181,6 +221,11 @@ if [[ "$(ls -A "$REAL_HOME/.cursor/skills" 2>/dev/null || true)" == "$real_curso
 	ok "real ~/.cursor/skills unchanged"
 else
 	not_ok "real ~/.cursor/skills changed"
+fi
+if [[ "$(ls -A "$REAL_HOME/.config/opencode/skills" 2>/dev/null || true)" == "$real_opencode" ]]; then
+	ok "real ~/.config/opencode/skills unchanged"
+else
+	not_ok "real ~/.config/opencode/skills changed"
 fi
 
 readme="$ROOT/README.md"
@@ -197,7 +242,9 @@ npx skills add
 -g
 -a claude-code
 -a cursor
+-a opencode
 ~/.cursor/skills
+~/.config/opencode/skills
 Uninstall
 EOF
 if [[ "$readme_ok" -eq 1 ]]; then

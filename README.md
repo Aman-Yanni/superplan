@@ -11,7 +11,7 @@
 
 ## Summary
 
-Superplan is a **global skill pack** for Claude Code and Cursor. It is the ColonyX turboplan port, generalized: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a dummy project without copying skills into that hub.
+Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is the ColonyX turboplan port, generalized: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a dummy project without copying skills into that hub.
 
 Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agent rules + phased delivery).
 
@@ -40,7 +40,7 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 
 ## 🛠️ The fix (target)
 
-- **One pack**, installed globally for **Claude Code and Cursor**.
+- **One pack**, installed globally for **Claude Code, Cursor, and OpenCode**.
 - **Planning workspace first** (e.g. `/Users/aman/projects/Claude Plans`), then a per-project hub folder (reuse `ColonyX/` if it exists, or create a name you choose).
 - **Select product repos** by searching the current folder or a work-folder path you give.
 - Hubs are **data-only**: `CLAUDE.md` / `AGENTS.md`, `rules/`, `phases/`. Skills stay global.
@@ -51,6 +51,7 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 you ──► ./install.sh (or npx skills add -g)
             │  symlink skills/ → ~/.claude/skills
             │                 → ~/.cursor/skills
+            │                 → ~/.config/opencode/skills
             ▼
         /superplan-init
             │  1. planning workspace path
@@ -81,11 +82,12 @@ Two paths. Prefer **`./install.sh`** while working in this git repo (no Node, sy
 
 ```bash
 ./install.sh              # interactive agent select
-./install.sh all          # Claude Code + Cursor, symlink
+./install.sh all          # Claude Code + Cursor + OpenCode, symlink
+./install.sh opencode     # OpenCode / DeepSeek only (alias: deepseek)
 ./install.sh --copy cursor
 ```
 
-Destinations: `$HOME/.claude/skills/<name>` and `$HOME/.cursor/skills/<name>`.
+Destinations: `$HOME/.claude/skills/<name>`, `$HOME/.cursor/skills/<name>`, and `$HOME/.config/opencode/skills/<name>`.
 
 Dry-run without touching your real home:
 
@@ -106,12 +108,13 @@ That must print all nine skills (`grill-me`, `setup-tasks`, `task-1-plan`, `task
 When you are ready to install globally (later; writes into your real home):
 
 ```bash
-npx skills add . -g -a claude-code -a cursor
+npx skills add . -g -a claude-code -a cursor -a opencode
 test -f ~/.claude/skills/grill-me/SKILL.md
 test -f ~/.cursor/skills/grill-me/SKILL.md
+test -f ~/.config/opencode/skills/grill-me/SKILL.md
 ```
 
-Always pass **`-a claude-code -a cursor`**. After a global add, confirm **`~/.cursor/skills/<name>/SKILL.md`** exists. The CLI has historically written `~/.agents/skills` and skipped Cursor's personal dir. If `~/.cursor/skills/grill-me/SKILL.md` is missing, run `./install.sh cursor` (or reinstall with `-a cursor -g`) and check again. Never install into `~/.cursor/skills-cursor`.
+Always pass **`-a claude-code -a cursor`**. For OpenCode/DeepSeek, pass **`-a opencode`** as well, then confirm **`~/.config/opencode/skills/<name>/SKILL.md`**. Prefer `./install.sh opencode` for that native dest. After a global add, confirm **`~/.cursor/skills/<name>/SKILL.md`** exists. The CLI has historically written `~/.agents/skills` and skipped Cursor's personal dir. If `~/.cursor/skills/grill-me/SKILL.md` is missing, run `./install.sh cursor` (or reinstall with `-a cursor -g`) and check again. Never install into `~/.cursor/skills-cursor`.
 
 There is no GitHub remote yet, so `npx skills add owner/superplan` will not work. Do not publish this pack to the skills.sh registry unless asked.
 
@@ -122,7 +125,7 @@ Remove only Superplan dests that are symlinks into this repo. Keep `humanize` an
 ```bash
 # from the Superplan clone
 for n in audit-rules bootstrap-turboplan dialectic-of-cognition grill-me setup-tasks superplan-init task-1-plan task-2-execute task-3-complete; do
-  rm -f "$HOME/.claude/skills/$n" "$HOME/.cursor/skills/$n"
+  rm -f "$HOME/.claude/skills/$n" "$HOME/.cursor/skills/$n" "$HOME/.config/opencode/skills/$n"
 done
 ```
 
@@ -150,6 +153,7 @@ Human-facing summary. Agents get detail in matching `.cursor/rules/*.mdc` spokes
 | skills CLI | `npx skills add -g` distribution | [github.com/vercel-labs/skills](https://github.com/vercel-labs/skills) | [`.cursor/rules/skills-cli.mdc`](.cursor/rules/skills-cli.mdc) |
 | Claude Code | Personal skills + `additionalDirectories` | [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) | [`.cursor/rules/claude-code.mdc`](.cursor/rules/claude-code.mdc) |
 | Cursor Skills | Personal `~/.cursor/skills` | [cursor.com/docs/skills](https://cursor.com/docs/skills) | [`.cursor/rules/cursor-skills.mdc`](.cursor/rules/cursor-skills.mdc) |
+| OpenCode | Personal `~/.config/opencode/skills` (DeepSeek and other models) | [opencode.ai/docs/skills](https://opencode.ai/docs/skills/) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
 | Planning hub | Workspace, data-only hubs, repo-rules-first | ColonyX `README.md` / `CLAUDE.md` | [`.cursor/rules/planning-hub.mdc`](.cursor/rules/planning-hub.mdc) |
 | install.sh | Agent-select symlink installer | [humanize install.sh](https://github.com/harshaneel/humanize/blob/main/install.sh) | [`.cursor/rules/install.mdc`](.cursor/rules/install.mdc) |
 | shellcheck / lefthook | Lint + pre-commit verify | [shellcheck wiki](https://www.shellcheck.net/wiki/) · [lefthook](https://lefthook.dev/) | [`.cursor/rules/shell.mdc`](.cursor/rules/shell.mdc) |
@@ -174,7 +178,7 @@ First action after reviewing this bootstrap: `/task-1-plan T01`.
 ## 🔒 Security / invariants
 
 - Secrets stay out of git (`.env`, credentials). Tests use a fake `HOME`.
-- Do not overwrite unrelated skills in `~/.claude/skills` or `~/.cursor/skills`.
+- Do not overwrite unrelated skills in `~/.claude/skills`, `~/.cursor/skills`, or `~/.config/opencode/skills`.
 - Never edit a bound product repo's own rules without approval; repo docs win on conflict.
 - Close-out never merges unless you opt in. No remotes created by default.
 - Global skills must not write `phases/` into a product repo — the hub path comes from config.

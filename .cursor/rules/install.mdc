@@ -11,7 +11,7 @@ alwaysApply: false
 What this spoke covers:
 
 - `./install.sh` (humanize-style): pick agents, symlink or `--copy`
-- Destinations for Claude Code and Cursor
+- Destinations for Claude Code, Cursor, and OpenCode (DeepSeek)
 - Authoring vs shipped install
 
 What this spoke does **not** cover (route elsewhere):
@@ -23,13 +23,13 @@ What this spoke does **not** cover (route elsewhere):
 
 1. Default is **symlink** from this repo's `skills/<name>` into each selected
    agent's global skills dir, so `git pull` updates are live while authoring.
-   Dest paths must use `"$HOME/.claude/skills"` and `"$HOME/.cursor/skills"`,
-   never `~` (tilde ignores a faked `HOME`).
-2. Supported install targets at minimum: `claude` → `$HOME/.claude/skills`,
-   `cursor` → `$HOME/.cursor/skills`. `all` (or interactive pick) does both.
-   Interactive walkthrough is the no-args path. On a TTY, print a Turboplan-style
-   banner, step ticks, and next-steps; disable colour when stdout is not a TTY
-   (tests).
+   Dest paths must use `"$HOME/.claude/skills"`, `"$HOME/.cursor/skills"`, and
+   `"$HOME/.config/opencode/skills"`, never `~` (tilde ignores a faked `HOME`).
+2. Supported install targets: `claude` → `$HOME/.claude/skills`,
+   `cursor` → `$HOME/.cursor/skills`, `opencode` (alias `deepseek`) →
+   `$HOME/.config/opencode/skills`. `all` does all three. Interactive: 1 claude,
+   2 cursor, 3 opencode, 4 all. On a TTY, print a Turboplan-style banner, step
+   ticks, and next-steps; disable colour when stdout is not a TTY (tests).
 3. `--copy` copies instead of linking. Say so in the output. Do not `rm -rf`
    a destination that is not a Superplan skill without asking. A dest is ours
    if it is a symlink to this pack's `skills/<name>`, or a directory whose
@@ -51,7 +51,11 @@ What this spoke does **not** cover (route elsewhere):
 - last consulted: 2026-09
 
 Also: Cursor dest https://cursor.com/docs/skills · Claude dest
-https://code.claude.com/docs/en/skills
+https://code.claude.com/docs/en/skills · OpenCode dest
+https://opencode.ai/docs/skills/ (native global:
+`$HOME/.config/opencode/skills`; OpenCode also reads `~/.claude/skills` and
+`~/.agents/skills`, but Superplan still installs a native dest). last
+consulted: 2026-09
 
 ## Problem classes
 
@@ -83,6 +87,14 @@ https://code.claude.com/docs/en/skills
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| Tests install into the real home, or a faked `HOME` stays empty | Script used `~/.claude` / `~/.cursor` (passwd home), not `$HOME` | Use `"$HOME/.claude/skills"` and `"$HOME/.cursor/skills"` everywhere |
+| Tests install into the real home, or a faked `HOME` stays empty | Script used `~/.claude` / `~/.cursor` / `~/.config/opencode` (passwd home), not `$HOME` | Use `"$HOME/.claude/skills"`, `"$HOME/.cursor/skills"`, and `"$HOME/.config/opencode/skills"` everywhere |
+
+<!-- last-verified: 2026-09 -->
+
+### `OpenCode dest is XDG config, not ~/.opencode`
+
+| Symptom | Cause | Fix |
+| ------- | ----- | --- |
+| DeepSeek/OpenCode session has no `/grill-me` | Installed to `~/.opencode/skills` or assumed Claude dest is enough | Native dest is `$HOME/.config/opencode/skills/<name>/SKILL.md`. `deepseek` is an alias for `opencode`. OpenCode can also see Claude's dest, but still install the native path when the user asks for OpenCode |
 
 <!-- last-verified: 2026-09 -->
