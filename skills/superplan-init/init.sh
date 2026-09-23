@@ -5,12 +5,15 @@ usage() {
 	cat <<'EOF'
 Usage:
   init.sh --hub NAME_OR_PATH [--workspace PATH] [--create-workspace] [--repo PATH ...]
+  init.sh --in-repo [--repo PATH ...]
   init.sh --discover PATH
   init.sh -h, --help
 
   With no --hub, uses cwd (or an ancestor) when it contains superplan.yml.
+  --in-repo: this git repo is the hub (turboplan-style). Plan and execute here.
 
   --hub NAME_OR_PATH   hub directory, or a folder name under --workspace / cwd
+  --in-repo            hub = cwd; cwd must be a git repo; binds cwd if no --repo
   --workspace PATH     optional parent for a bare --hub name
   --create-workspace   create --workspace if missing
   --repo PATH          bound product repo (repeatable); must exist
@@ -131,10 +134,14 @@ write_hub_files() {
 	out="${out//@@REPOS_TABLE@@/$table}"
 	out="${out//@@ROUTING_ROWS@@/$routing}"
 	out="${out//@@VERIFY_GATES@@/$gates}"
-	printf '%s' "$out" >"$hub/CLAUDE.md"
+	if [[ ! -e "$hub/CLAUDE.md" ]]; then
+		printf '%s' "$out" >"$hub/CLAUDE.md"
+	fi
 	out="$(cat "$tpl/AGENTS.md")"
 	out="${out//@@HUB_NAME@@/$hub_name}"
-	printf '%s' "$out" >"$hub/AGENTS.md"
+	if [[ ! -e "$hub/AGENTS.md" ]]; then
+		printf '%s' "$out" >"$hub/AGENTS.md"
+	fi
 	if [[ ! -e "$hub/phases/INDEX.md" ]]; then
 		out="$(cat "$tpl/phases/INDEX.md")"
 		out="${out//@@HUB_NAME@@/$hub_name}"
@@ -162,6 +169,7 @@ write_hub_files() {
 workspace=""
 hub_arg=""
 create_ws=0
+in_repo=0
 do_discover=""
 repos=()
 
@@ -192,6 +200,10 @@ while [[ $# -gt 0 ]]; do
 		create_ws=1
 		shift
 		;;
+	--in-repo)
+		in_repo=1
+		shift
+		;;
 	--discover)
 		do_discover=${2:?init: --discover needs a path}
 		shift 2
@@ -209,7 +221,16 @@ if [[ -n "$do_discover" ]]; then
 fi
 
 hub=""
-if [[ -z "$hub_arg" ]]; then
+if [[ "$in_repo" -eq 1 ]]; then
+	if [[ ! -d ./.git ]]; then
+		echo "init: --in-repo requires cwd to be a git repository" >&2
+		exit 1
+	fi
+	hub="$(pwd)"
+	if [[ ${#repos[@]} -eq 0 ]]; then
+		repos+=("$hub")
+	fi
+elif [[ -z "$hub_arg" ]]; then
 	if hub="$(find_hub_up .)"; then
 		:
 	else
@@ -218,7 +239,7 @@ if [[ -z "$hub_arg" ]]; then
 	fi
 fi
 
-if [[ -n "$hub_arg" ]]; then
+if [[ "$in_repo" -eq 0 && -n "$hub_arg" ]]; then
 	if [[ -n "$workspace" ]]; then
 		if [[ ! -d "$workspace" ]]; then
 			if [[ "$create_ws" -eq 1 ]]; then
@@ -251,6 +272,10 @@ for r in "${repos[@]+"${repos[@]}"}"; do
 	fi
 	resolved_repos+=("$(cd "$r" && pwd)")
 done
+
+if [[ ${#resolved_repos[@]} -eq 0 && -d "$hub/.git" && ! -f "$hub/superplan.yml" ]]; then
+	resolved_repos+=("$hub")
+fi
 
 write_superplan_yml=1
 if [[ -f "$hub/superplan.yml" && ${#repos[@]} -eq 0 ]]; then

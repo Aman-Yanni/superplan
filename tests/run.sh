@@ -283,6 +283,11 @@ if [[ ! -e "$ws/Dummy/.claude/skills" && ! -e "$ws/Dummy/.cursor/skills" ]] && g
 else
 	not_ok "init.sh hub skills or additionalDirectories"
 fi
+if [[ ! -e "$repo1/superplan.yml" && ! -e "$repo1/phases" ]]; then
+	ok "separate hub does not write phases into the bound repo"
+else
+	not_ok "separate hub polluted the bound repo"
+fi
 printf 'keep-me\n' >"$ws/Dummy/rules/keep.md"
 HOME="$fake_init_home" run_cmd "$INIT" --hub "$ws/Dummy" --repo "$repo1"
 if [[ -f "$ws/Dummy/rules/keep.md" ]] && grep -q 'keep-me' "$ws/Dummy/rules/keep.md"; then
@@ -336,6 +341,31 @@ if [[ "$run_code" -eq 2 && "$run_err" == *"--hub is required"* ]]; then
 	ok "init.sh without hub or superplan.yml asks for --hub"
 else
 	not_ok "init.sh missing hub (code=$run_code err=$run_err)"
+fi
+
+in_repo="$(newtmp)/app"
+mkdir -p "$in_repo/.git"
+in_home="$(newtmp)"
+outf="$(newtmp)/out"
+errf="$(newtmp)/err"
+run_code=0
+(cd "$in_repo" && HOME="$in_home" "$INIT" --in-repo >"$outf" 2>"$errf") || run_code=$?
+run_out="$(cat "$outf")"
+run_err="$(cat "$errf")"
+if [[ "$run_code" -eq 0 && -f "$in_repo/superplan.yml" && -f "$in_repo/phases/INDEX.md" ]] && grep -q "$in_repo" "$in_repo/superplan.yml" && [[ ! -e "$in_home/.superplan" ]]; then
+	ok "init.sh --in-repo plans inside the git repo"
+else
+	not_ok "init.sh --in-repo (code=$run_code out=$run_out err=$run_err)"
+fi
+
+notgit="$(newtmp)"
+errf="$(newtmp)/err"
+run_code=0
+(cd "$notgit" && HOME="$(newtmp)" "$INIT" --in-repo >"$(newtmp)/out" 2>"$errf") || run_code=$?
+if [[ "$run_code" -eq 1 && "$(cat "$errf")" == *"git repository"* ]]; then
+	ok "init.sh --in-repo without git fails"
+else
+	not_ok "init.sh --in-repo notgit (code=$run_code err=$(cat "$errf"))"
 fi
 
 missing_ws="$(newtmp)/no-such-ws"

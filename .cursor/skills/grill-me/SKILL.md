@@ -6,7 +6,7 @@ description: >-
   sub-agents. Runs between "human has an idea" and /setup-tasks (or
   /bootstrap-turboplan). Does not write plans or tasks.
 disable-model-invocation: true
-allowed-tools: Bash, Read, Grep, Glob, Edit, Write, WebFetch, WebSearch, Task
+allowed-tools: Bash, Read, Grep, Glob, Edit, Write, WebFetch, WebSearch, Task, AskQuestion, AskUserQuestion
 ---
 
 # /grill-me — Idea → interrogated, settled shared understanding
@@ -42,25 +42,34 @@ decisions that hang off it.
 
 Work the tree in **rounds**. The **frontier** is every decision whose
 prerequisites are already settled — the questions you can ask _now_ without
-guessing at answers you haven't heard yet. Ask the whole frontier in one round:
-number each question and give your recommended answer. Then wait for the
-human's answers before the next round.
+guessing at answers you haven't heard yet. Ask the whole frontier in one round,
+then wait.
 
-Each question is formatted like so:
+**Use clickable choice UI, not a numbered list in the chat.** Do not write
+Q1/Q2 with (a)(b)(c) and wait for the human to type a letter or number. Call
+the agent's native multiple-choice tool in the same turn:
 
-```
-❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+- Cursor: `AskQuestion`
+- Claude Code: `AskUserQuestion`
+- Other runtimes: the equivalent choice/form tool
 
-➡️ <your recommended answer>
-```
+Each question:
+
+1. `prompt` is the question (short title plus body).
+2. At least two concrete options. Put your recommended answer first and end
+   that label with `(Recommended)`.
+3. **Always** append a last option the human can use to type their own
+   suggestion: id `other`, label `I'll write my own`. Leave it as the empty /
+   free-text choice — do not prefill it. If the tool also injects an Other
+   field, keep this option anyway so the custom path is visible in the list.
+4. Put every frontier question in **one** tool call (the questions array).
+
+Do not repeat the same options as markdown in the assistant message.
 
 Each round of answers reshapes the tree — settled decisions push the frontier
 outward and unblock the questions that depended on them. Recompute the frontier
 and ask the next round. A question whose answer depends on another question
 still open in this round belongs to a _later_ round, not this one.
-
-Silence on a question means the human accepts the ➡️ recommendation — say so
-each round so answering stays cheap.
 
 ### 3. Facts are your job, decisions are the human's
 
@@ -96,7 +105,8 @@ the INDEX header and the task stubs that follow — nothing assumed.
 
 - Run `/setup-tasks` or `/bootstrap-turboplan` before the human confirms the summary
 - Ask the human questions a sub-agent could answer from the repo or docs
-- Record a decision the human did not make or accept a ➡️ for
+- Record a decision the human did not make or pick in the choice UI
+- List lettered or numbered choices in chat for the human to type back
 - Write phase stubs, plans, or product code
 - End the session with unvisited branches — if the tree is large, say so and
   keep rounding

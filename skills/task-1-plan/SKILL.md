@@ -21,8 +21,8 @@ Task: $ARGUMENTS
 
 Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
 for `superplan.yml`; otherwise ask for the hub path.
-If the hub cannot be resolved, **stop and ask**. Do not write hub
-files into a product repo.
+If the hub cannot be resolved, **stop and ask**. Write hub files only
+under the hub (in-repo mode: the hub may be this git repo).
 
 If no task is given, read `phases/INDEX.md` and pick the first `Pending` or
 `Planned` row whose Depends-on are all `✅` or `—`.
@@ -80,7 +80,7 @@ Ready? · key steps · AC · execute model · Next: `/task-2-execute TXX`
 
 ## Do not
 
-- Implement the task, or edit any product repo.
+- Implement the task, or write product feature code.
 - Expand scope into later layers.
 - Mark INDEX `✅`.
 - Leave a plan that forces the executor to redesign.

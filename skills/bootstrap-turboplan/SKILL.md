@@ -16,15 +16,15 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash(git *), Agent, WebFetch, WebS
 
 Bring the hub back in line with the bound repos: re-inventory each repo's
 rules, context sources and gates; rewrite the hub `CLAUDE.md` / `AGENTS.md`
-tables; adapt spokes; onboard a new repo. You don't write product code or
-change any product repo.
+tables; adapt spokes; onboard a new repo. You don't write product feature code.
+When the hub is a separate folder, you don't change bound product repos.
 
 Input: $ARGUMENTS
 
 Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
 for `superplan.yml`; otherwise ask for the hub path.
-If the hub cannot be resolved, **stop and ask**. Do not write hub
-files into a product repo.
+If the hub cannot be resolved, **stop and ask**. Write hub files only
+under the hub (in-repo mode: the hub may be this git repo).
 
 If the input doesn't say what changed or which repos are in scope, ask before
 starting.
@@ -90,7 +90,7 @@ Update hub `README.md`: bound repos, how to launch, work loop, layout.
 - [ ] Routing Map ↔ `rules/*.md`.
 - [ ] `phases/INDEX.md` rows ↔ stub files.
 - [ ] Every new fact has evidence.
-- [ ] No product repo was modified (`git -C <repo> status` unchanged by you).
+- [ ] No product *feature* code was added. Hub files in-repo (when the hub is the git repo) are expected.
 - [ ] Hub has no pack skill copies.
 
 ### 7. Output
@@ -116,7 +116,7 @@ Confirm before the next /setup-tasks.
 
 ## Do not
 
-- Modify any product repo.
+- Modify a bound product repo that is **not** the hub (no feature code either way).
 - Copy repo rules wholesale into the hub — route to them instead.
 - Write facts you haven't read in this session.
 - Copy Superplan skills into the hub.

@@ -9,7 +9,7 @@ argument-hint: "[idea, or path to a spec]"
 disable-model-invocation: true
 model: opus
 effort: high
-allowed-tools: Read, Grep, Glob, Agent, WebFetch, WebSearch
+allowed-tools: Read, Grep, Glob, Agent, WebFetch, WebSearch, AskQuestion, AskUserQuestion
 ---
 
 # /grill-me — Idea → settled shared understanding
@@ -26,8 +26,8 @@ Idea: $ARGUMENTS
 
 Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
 for `superplan.yml`; otherwise ask for the hub path.
-If the hub cannot be resolved, stop and ask. Do not invent a hub
-or write into a product repo.
+If the hub cannot be resolved, stop and ask. Do not invent a hub.
+Write hub files only under the hub (in-repo mode: that may be this git repo).
 
 ## 1. Read before grilling
 
@@ -50,19 +50,37 @@ Before the first question:
 ## 2. Interview in rounds over a design tree
 
 Every decision branches into the decisions that hang off it. The **frontier**
-is every decision whose prerequisites are settled. Ask the whole frontier in one
-round, numbered, each with a recommended answer, then wait:
+is every decision whose prerequisites are settled. Ask the whole frontier in
+one round, then wait.
 
-```
-❓ **Q1** - **<question title>**: <question body, with options where they exist>
+**Use clickable choice UI, not a numbered list in the chat.** Do not write
+Q1/Q2 with (a)(b)(c) and wait for the human to type a letter or number. Call
+the agent's native multiple-choice tool in the same turn as the questions:
 
-➡️ <your recommended answer>
-```
+- Cursor: `AskQuestion`
+- Claude Code: `AskUserQuestion`
+- Other runtimes: the equivalent choice/form tool
 
-Silence on a question means the human accepts ➡️ — say so every round. Answers
-reshape the tree: recompute the frontier and ask the next round. A question
-whose answer depends on another question still open this round belongs to a
-later round.
+Each question in that call:
+
+1. `prompt` is the question (short title plus body).
+2. At least two concrete options. Put your recommended answer first and end
+   that label with `(Recommended)`.
+3. **Always** append a last option the human can use to type their own
+   suggestion: id `other`, label `I'll write my own`. Leave it as the empty /
+   free-text choice — do not prefill it. If the tool also injects an Other
+   field, keep this option anyway so the custom path is visible in the list.
+4. Put every frontier question in **one** tool call (the questions array).
+
+Do not repeat the same options as markdown in the assistant message. A short
+sentence that the form is up is enough.
+
+If the runtime has no choice UI, fall back to chat but still end every
+question with a blank `I'll write my own:` line — never only lettered choices.
+
+Answers reshape the tree: recompute the frontier and ask the next round. A
+question whose answer depends on another question still open this round
+belongs to a later round.
 
 ## 3. Facts are yours, decisions are the human's
 
@@ -88,6 +106,7 @@ settled decision must land in the INDEX feature header or a task stub.
 
 - Run `/setup-tasks` or `/bootstrap-turboplan` before the human confirms the summary.
 - Ask the human anything a subagent could find in a repo or its docs.
-- Record a decision the human didn't make or accept.
+- Record a decision the human didn't make or pick in the choice UI.
+- List lettered or numbered choices in chat for the human to type back.
 - Write stubs, plans or code.
 - End with unvisited branches — if the tree is large, say so and keep rounding.

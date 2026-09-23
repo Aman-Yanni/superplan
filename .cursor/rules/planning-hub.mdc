@@ -26,8 +26,9 @@ What this spoke does **not** cover (route elsewhere):
    `rules/`, `phases/`, `templates/`, and a small config (`superplan.yml`).
    It does not copy Superplan skills.
 2. **Current path first.** If cwd or an ancestor has `superplan.yml`, that
-   directory is the hub. Otherwise init (and work-loop skills) ask for a hub
-   path. Do not read a machine-wide `hub:` default.
+   directory is the hub. Otherwise init asks **in-repo** (this git repo,
+   turboplan-style) vs a **separate** hub path. Do not read a machine-wide
+   `hub:` default.
 3. **Reuse before create.** If `<workspace>/<name>/` already exists, reuse it.
    If it does not, suggest a folder name, or let the user name it, or accept a
    path they already created.
@@ -45,15 +46,17 @@ What this spoke does **not** cover (route elsewhere):
    asks.
 7. Global skills resolve the hub **per project**: nearest `superplan.yml`
    walking up from cwd, otherwise they ask. They never read
-   `$HOME/.superplan/config.yml`. Writing `phases/` into a product repo is a bug.
+   `$HOME/.superplan/config.yml`. The hub may be the product repo (**in-repo** /
+   turboplan-style: plan and execute in that folder). Writing `phases/` into a
+   bound repo that is **not** the hub is a bug.
 
 ## Init sequence (product)
 
 ```
 1. cwd / ancestor with superplan.yml → that hub
-2. else ask for a hub path (create if needed)
-3. Discover product repos (cwd search OR work-folder path) → user selects
-4. Write or refresh the data-only hub; bind repos; agent access config
+2. else: this git repo (in-repo) or a separate hub path the human names
+3. Bind product repos (in-repo defaults to this repo)
+4. Write or refresh hub files; agent access config
 ```
 
 Per hub: `<hub>/superplan.yml` → repos, `merge_prs: false`.
@@ -76,7 +79,7 @@ Also: hub `CLAUDE.md` (repo-rules-first, additionalDirectories).
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| `phases/` or `rules/` appear inside a product git repo | Global skill assumed cwd is the planning hub without checking for `superplan.yml` | Walk up from cwd for `superplan.yml`; otherwise ask for the hub path. Follow `references/hub-resolution.md`. Refuse to write hub files into a bound product repo. |
+| `phases/` or `rules/` appear inside a bound git repo that is not the hub | Global skill treated a product repo as the hub without `superplan.yml` there | Walk up from cwd for `superplan.yml`. In-repo mode is valid only when the hub *is* that repo. Follow `references/hub-resolution.md`. |
 
 <!-- last-verified: 2026-09 -->
 

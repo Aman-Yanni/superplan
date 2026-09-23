@@ -21,8 +21,8 @@ Task: $ARGUMENTS
 
 Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
 for `superplan.yml`; otherwise ask for the hub path.
-If the hub cannot be resolved, **stop and ask**. Do not write hub
-files into a product repo.
+If the hub cannot be resolved, **stop and ask**. Write hub files only
+under the hub (in-repo mode: the hub may be this git repo).
 
 If no task is given: the first `Planned` INDEX row, else the first actionable
 `Pending` one.

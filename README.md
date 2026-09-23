@@ -11,7 +11,7 @@
 
 ## Summary
 
-Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is a [Turboplan](https://github.com/commoddity/turboplan) port: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine, and each product gets a **data-only planning hub** under a workspace you choose. You can bind one repo or many at the same time. Done means you can `./install.sh` (or later `npx skills add`) and `/superplan-init` a project without copying skills into that hub.
+Superplan is a **global skill pack** for Claude Code, Cursor, and OpenCode (DeepSeek). It is a [Turboplan](https://github.com/commoddity/turboplan) port: the work-loop skills (`/grill-me` → `/setup-tasks` → plan → execute → complete) live once on your machine. You can plan **in the product repo** (turboplan-style) or in a **separate hub** that binds one or more repos. Skills are never copied into the project.
 
 Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agent rules + phased delivery).
 
@@ -41,7 +41,7 @@ Bootstrapped with **[Turboplan](https://github.com/commoddity/turboplan)** (agen
 ## 🛠️ The fix (target)
 
 - **One pack**, installed globally for **Claude Code, Cursor, and OpenCode**.
-- **Hub is the current project.** If this folder (or a parent) has `superplan.yml`, that is the hub. Otherwise `/superplan-init` asks for a path.
+- **Hub is the current project.** If this folder (or a parent) has `superplan.yml`, that is the hub. Otherwise `/superplan-init` asks: **this git repo** (turboplan-style: plan and execute here) or a **separate** hub folder.
 - **Select product repos** by searching the current folder or a work-folder path you give.
 - Hubs are **data-only**: `CLAUDE.md` / `AGENTS.md`, `rules/`, `phases/`. Skills stay global.
 - **Repo rules win.** Hub spokes add routing and cross-repo notes; they do not replace a repo's own docs. Conflicts are reported and asked about.
@@ -55,11 +55,12 @@ you ──► ./install.sh (or npx skills add -g)
             ▼
         /superplan-init
             │  1. cwd if it already has superplan.yml
-            │  2. otherwise ask for a hub path
-            │  3. pick product repos
+            │  2. else this git repo (in-repo) or a separate hub path
+            │  3. pick product repos (in-repo defaults to this repo)
             ▼
-        <hub>/   (data-only: superplan.yml, phases/, rules/)
-            + bound repos on disk (unchanged)
+        in-repo:  <git-repo>/superplan.yml + phases/   ← plan and execute here
+        or hub:   <hub>/superplan.yml + phases/
+                  + bound repos on disk (code only)
 ```
 
 While Superplan itself is being built, prefer **symlink** from this git repo so edits are live. The shipped path is the same installer plus `npx skills add`.
@@ -179,7 +180,7 @@ See [`planning/phases/INDEX.md`](planning/phases/INDEX.md). T01–T08 are comple
 - Do not overwrite unrelated skills in `~/.claude/skills`, `~/.cursor/skills`, or `~/.config/opencode/skills`.
 - Never edit a bound product repo's own rules without approval; repo docs win on conflict.
 - Close-out never merges unless you opt in. No remotes created by default.
-- Global skills must not write `phases/` into a product repo — the hub is the nearest `superplan.yml` from cwd, or a path the human gives.
+- Global skills write `phases/` only under the hub. The hub may be the product repo (in-repo). Do not write `phases/` into a bound repo that is not the hub.
 
 ## 📜 License / attribution
 

@@ -3,8 +3,8 @@ name: setup-tasks
 description: >-
   Turn a settled feature (ideally a confirmed /grill-me summary) into task stubs
   appended to phases/INDEX.md, respecting each touched repo's own rules and the
-  existing dependency graph. Does not change the hub rules, skills or any repo.
-  Manual only.
+  existing dependency graph. Does not rewrite hub rules or skills, and does
+  not write product feature code. Manual only.
 argument-hint: "[confirmed /grill-me summary, or feature description]"
 disable-model-invocation: true
 model: opus
@@ -16,15 +16,15 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Agent, WebFetch, WebSearch
 
 Turn a settled feature into task stubs appended to `phases/INDEX.md`. You don't
 rewrite the hub `CLAUDE.md`/`AGENTS.md`, spokes or skills (the one exception:
-adding an approved dependency spoke to the Routing Map), and you don't touch
-any product repo.
+adding an approved dependency spoke to the Routing Map), and you don't write
+product feature code.
 
 Input: $ARGUMENTS
 
 Resolve the hub first — read `references/hub-resolution.md`. Walk up from cwd
 for `superplan.yml`; otherwise ask for the hub path.
-If the hub cannot be resolved, **stop and ask**. Do not write
-`phases/` or `rules/` into a product repo.
+If the hub cannot be resolved, **stop and ask**. Write `phases/` and
+`rules/` only under the hub (in-repo mode: the hub may be this git repo).
 
 ## Context gathering (mandatory)
 
@@ -97,7 +97,7 @@ Map.
 ## Do not
 
 - Rewrite the hub, spokes, skills or existing INDEX rows.
-- Edit any product repo or write product code.
+- Write product feature code. Hub files (`phases/`, hub `rules/`) belong under the hub, which may be this repo.
 - Skip context gathering because the human seems busy.
 - Create a dependency spoke without approval.
 - Copy Superplan pack skills into the hub (hubs are data-only).
